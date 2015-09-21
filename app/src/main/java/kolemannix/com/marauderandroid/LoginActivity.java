@@ -285,8 +285,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
             if (success) {
 
-//
                 Intent intent = new Intent(getApplicationContext(), MapActivity.class);
+                String[] profile = {mEmail, mPassword};
+                intent.putExtra("profile", profile);
                 startActivity(intent);
                 finish();
             } else {

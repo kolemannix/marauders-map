@@ -33,7 +33,12 @@ public class SplashActivity extends AppCompatActivity {
         locations = Service.getLocations();
 
 
-
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        onPasswordHeard();
     }
 
     /**
@@ -45,12 +50,12 @@ public class SplashActivity extends AppCompatActivity {
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                getString(R.string.accept));
+                getString(R.string.action_sign_in));
         try {
             startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
         } catch (ActivityNotFoundException a) {
             Toast.makeText(getApplicationContext(),
-                    getString(R.string.accept),
+                    getString(R.string.action_sign_in),
                     Toast.LENGTH_SHORT).show();
         }
     }

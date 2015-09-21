@@ -54,8 +54,8 @@ public class MapActivity extends Activity {
         setContentView(R.layout.activity_map);
 
         Intent intent = getIntent();
-                String[] message = intent.getStringArrayExtra("profile");
-                Log.i("profile", message[0] + "::" + message[1]);
+        String[] message = intent.getStringArrayExtra("profile");
+        Log.i("profile", message[0] + "::" + message[1]);
 
         final View controlsView = findViewById(R.id.fullscreen_content_controls);
         final View contentView = findViewById(R.id.fullscreen_content);
