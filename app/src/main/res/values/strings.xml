@@ -1,14 +1,13 @@
 <resources>
-    <string name="app_name">MarauderAndroid</string>
-
     <string name="title_activity_map">MapActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="title_activity_splash">SplashActivity</string>
-
     <string name="greeting">Messrs Moony, Wormtail, Padfoot, and Prongs
                             Purveyors of Aids to Magical Mischief-Makers
                             are proud to present
                             The Marauder's Map</string>
+    <string name="app_name">Marauders Map</string>
+    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 </resources>
