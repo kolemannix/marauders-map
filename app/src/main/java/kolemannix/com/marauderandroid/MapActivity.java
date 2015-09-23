@@ -4,13 +4,18 @@ import kolemannix.com.marauderandroid.util.SystemUiHider;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -19,33 +24,15 @@ import android.view.View;
  * @see SystemUiHider
  */
 public class MapActivity extends Activity {
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
+
     private static final boolean AUTO_HIDE = true;
-
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-    /**
-     * If set, will toggle the system UI visibility upon interaction. Otherwise,
-     * will show the system UI visibility upon interaction.
-     */
     private static final boolean TOGGLE_ON_CLICK = true;
-
-    /**
-     * The flags to pass to {@link SystemUiHider#getInstance}.
-     */
     private static final int HIDER_FLAGS = SystemUiHider.FLAG_HIDE_NAVIGATION;
 
-    /**
-     * The instance of the {@link SystemUiHider} for this activity.
-     */
     private SystemUiHider mSystemUiHider;
+    private LocationManager mLocationManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +43,32 @@ public class MapActivity extends Activity {
         Intent intent = getIntent();
         String[] message = intent.getStringArrayExtra("profile");
         Log.i("profile", message[0] + "::" + message[1]);
+
+        mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+        LocationListener listener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                updateLocation(location);
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5, 5, listener);
 
         final View controlsView = findViewById(R.id.fullscreen_content_controls);
         final View contentView = findViewById(R.id.fullscreen_content);
@@ -74,10 +87,6 @@ public class MapActivity extends Activity {
                     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
                     public void onVisibilityChange(boolean visible) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-                            // If the ViewPropertyAnimator API is available
-                            // (Honeycomb MR2 and later), use it to animate the
-                            // in-layout UI controls at the bottom of the
-                            // screen.
                             if (mControlsHeight == 0) {
                                 mControlsHeight = controlsView.getHeight();
                             }
@@ -89,12 +98,8 @@ public class MapActivity extends Activity {
                                     .translationY(visible ? 0 : mControlsHeight)
                                     .setDuration(mShortAnimTime);
                         } else {
-                            // If the ViewPropertyAnimator APIs aren't
-                            // available, simply show or hide the in-layout UI
-                            // controls.
                             controlsView.setVisibility(visible ? View.VISIBLE : View.GONE);
                         }
-
                         if (visible && AUTO_HIDE) {
                             // Schedule a hide().
                             delayedHide(AUTO_HIDE_DELAY_MILLIS);
@@ -114,10 +119,17 @@ public class MapActivity extends Activity {
             }
         });
 
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
         findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+    }
+
+    private void updateLocation(Location location) {
+        ((TextView)findViewById(R.id.fullscreen_content)).setText(location.getLatitude() + ", " + location.getLongitude());
+    }
+
+    public void mischiefManaged(View view) {
+        finish();
+        getApplication().onTerminate();
+        System.exit(0);
     }
 
     @Override
@@ -129,7 +141,6 @@ public class MapActivity extends Activity {
         // are available.
         delayedHide(100);
     }
-
 
     /**
      * Touch listener to use for in-layout UI controls to delay hiding the

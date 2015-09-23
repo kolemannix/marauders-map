@@ -9,6 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -21,24 +25,27 @@ public class SplashActivity extends AppCompatActivity {
     // For now, we assume stored creds = good creds
     Map<MarauderProfile, Location> locations = null;
     private final int REQ_CODE_SPEECH_INPUT = 100;
+    TextView mMessageView;
+    Button mInsultButton;
+    Button mUnlockButton;
+    int insultIndex;
+    int[] insult_ids = {R.string.insult_1, R.string.insult_2, R.string.insult_3, R.string.insult_4};
 
     List<String> speechInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+//        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
+        mMessageView = (TextView)findViewById(R.id.splash_message_text);
+        mInsultButton = (Button)findViewById(R.id.insult_button);
+        mUnlockButton = (Button)findViewById(R.id.unlock_button);
+        insultIndex = 0;
+
         // Launch asynchronous listener process
         locations = Service.getLocations();
-
-
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        onPasswordHeard();
     }
 
     /**
@@ -81,7 +88,13 @@ public class SplashActivity extends AppCompatActivity {
         }
     }
 
-    private void onPasswordHeard() {
+    public void insult(View view) {
+        String insult = getString(insult_ids[insultIndex]);
+        insultIndex = (insultIndex + 1) % 4;
+        mMessageView.setText(insult);
+    }
+
+    public void unlock(View view) {
         // Check the local keystore
         MarauderProfile profile = checkStorage();
         if (profile != null) {
@@ -99,4 +112,5 @@ public class SplashActivity extends AppCompatActivity {
     private MarauderProfile checkStorage() {
         return null;
     }
+
 }

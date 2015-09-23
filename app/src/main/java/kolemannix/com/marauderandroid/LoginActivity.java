@@ -288,8 +288,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 Intent intent = new Intent(getApplicationContext(), MapActivity.class);
                 String[] profile = {mEmail, mPassword};
                 intent.putExtra("profile", profile);
-                startActivity(intent);
                 finish();
+                startActivity(intent);
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

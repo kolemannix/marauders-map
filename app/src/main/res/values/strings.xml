@@ -1,12 +1,16 @@
 <resources>
     <string name="title_activity_map">MapActivity</string>
-    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_button">Mischief Managed!</string>
     <string name="dummy_content">Map\nContent</string>
     <string name="title_activity_splash">SplashActivity</string>
     <string name="greeting">Messrs Moony, Wormtail, Padfoot, and Prongs
-                            Purveyors of Aids to Magical Mischief-Makers
-                            are proud to present
-                            The Marauder\'s Map</string>
+                            \nPurveyors of Aids to Magical Mischief-Makers
+                            \nare proud to present
+                            \nThe Marauder\'s Map</string>
+    <string name="insult_1">Mr. Moony presents his compliments to Professor Snape and begs him to keep his abnormally large nose out of other people\'s business.</string>
+    <string name="insult_2">Mr. Prongs agrees with Mr Moony and would like to add that Professor Snape is an ugly git.</string>
+    <string name="insult_3">Mr. Padfoot would like to register his astonishment that an idiot like that ever became a Professor.</string>
+    <string name="insult_4">Mr. Wormtail bids Professor Snape good day, and advises him to wash his hair, the slime-ball.</string>
     <string name="app_name">Marauder\'s Map</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>

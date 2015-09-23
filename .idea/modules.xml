@@ -2,13 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/MarauderAndroid.iml" filepath="$PROJECT_DIR$/MarauderAndroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-=======
-      <module fileurl="file://$USER_HOME$/Dropbox/uva/cs4720/android/MaraudersMap/MaraudersMap.iml" filepath="$USER_HOME$/Dropbox/uva/cs4720/android/MaraudersMap/MaraudersMap.iml" />
-      <module fileurl="file://$USER_HOME$/Dropbox/uva/cs4720/android/MaraudersMap/app/app.iml" filepath="$USER_HOME$/Dropbox/uva/cs4720/android/MaraudersMap/app/app.iml" />
->>>>>>> 986f7b1123110c0bdeb59703ac69b7712dfb331d
     </modules>
   </component>
 </project>
