@@ -1,5 +1,6 @@
 package kolemannix.com.marauderandroid;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.location.Location;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends Activity {
 
     // For now, we assume stored creds = good creds
     Map<MarauderProfile, Location> locations = null;
