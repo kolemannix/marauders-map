@@ -26,6 +26,7 @@ public class SplashActivity extends Activity {
     // For now, we assume stored creds = good creds
     Map<MarauderProfile, Location> locations = null;
     private final int REQ_CODE_SPEECH_INPUT = 100;
+
     TextView mMessageView;
     Button mInsultButton;
     Button mUnlockButton;
@@ -36,7 +37,6 @@ public class SplashActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
@@ -78,10 +78,7 @@ public class SplashActivity extends Activity {
         switch (requestCode) {
             case REQ_CODE_SPEECH_INPUT: {
                 if (resultCode == RESULT_OK && null != data) {
-
-                    List<String> result = data
-                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    speechInput = result;
+                    speechInput = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                 }
                 break;
             }

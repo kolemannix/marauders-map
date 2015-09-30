@@ -5,14 +5,25 @@
     <string name="title_activity_splash">SplashActivity</string>
     <string name="greeting">Messrs Moony, Wormtail, Padfoot, and Prongs
                             \nPurveyors of Aids to Magical Mischief-Makers
-                            \nare proud to present
-                            \nThe Marauder\'s Map</string>
+                            \nare proud to present...</string>
+    <string name="app_title">The Marauder\'s Map</string>
     <string name="insult_1">Mr. Moony presents his compliments to Professor Snape and begs him to keep his abnormally large nose out of other people\'s business.</string>
     <string name="insult_2">Mr. Prongs agrees with Mr Moony and would like to add that Professor Snape is an ugly git.</string>
     <string name="insult_3">Mr. Padfoot would like to register his astonishment that an idiot like that ever became a Professor.</string>
     <string name="insult_4">Mr. Wormtail bids Professor Snape good day, and advises him to wash his hair, the slime-ball.</string>
+    <string name="secret_passphrase">I solemnly swear that I am up to no good.</string>
+    <string name="insult_button">Reveal your secrets!</string>
     <string name="app_name">Marauder\'s Map</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_maps_activity_test">Map</string>
+    <string name="prompt_username">Username</string>
+    <string name="most_recent_username">"Username"</string>
+    <string name="most_recent_email">"Email"</string>
+    <string name="most_recent_icon_id">"Default"</string>
+    <string name="login_preferences_file_key">kolemannix.com.marauderandroid.loginpreferences</string>
+    <string-array name="icon_choices">
+        <item>Default</item>
+        <item>Stag</item>
+        <item>Wolf</item>
+    </string-array>
 </resources>

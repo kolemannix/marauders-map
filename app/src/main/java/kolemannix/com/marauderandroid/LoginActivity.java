@@ -5,11 +5,13 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.ContentResolver;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 
@@ -17,24 +19,23 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ImageView;
+import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A login screen that offers login via email/password.
+ * A login screen that offers login via username & email.
  */
-public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
-
+public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, AdapterView.OnItemSelectedListener {
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
@@ -49,33 +50,37 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     // UI references.
     private AutoCompleteTextView mEmailView;
-    private EditText mPasswordView;
+    private EditText mUsernameView;
     private View mProgressView;
     private View mLoginFormView;
+    private SharedPreferences sharedPref;
+    private ImageView mIconView;
+    private String mIconSelection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // Set up the icon selector
+        mIconSelection = "Default";
+        mIconView = (ImageView) findViewById(R.id.icon_view);
+        Spinner iconSpinner = (Spinner)findViewById(R.id.icon_spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.icon_choices, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        iconSpinner.setAdapter(adapter);
+        iconSpinner.setOnItemSelectedListener(this);
+
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mUsernameView = (EditText) findViewById(R.id.username_view);
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.email_view);
         populateAutoComplete();
 
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
+        setupSharedPreferences();
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
+        Button mSignInButton = (Button) findViewById(R.id.sign_in_button);
+        mSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
@@ -88,6 +93,45 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     private void populateAutoComplete() {
         getLoaderManager().initLoader(0, null, this);
+    }
+
+    private void setupSharedPreferences() {
+        sharedPref = this.getSharedPreferences(
+                getString(R.string.login_preferences_file_key), Context.MODE_PRIVATE);
+
+        String defaultUserValue = "Username";
+        String recent_username = sharedPref.getString(getString(R.string.most_recent_username), defaultUserValue);
+        String defaultEmailValue = "Email";
+        String recent_email = sharedPref.getString(getString(R.string.most_recent_email), defaultEmailValue);
+
+        if(recent_email.equals("Email") || recent_username.equals("Username")) {
+            mUsernameView.setHint(recent_username);
+            mEmailView.setHint(recent_email);
+        } else {
+            mUsernameView.setText(recent_username);
+            mEmailView.setText(recent_email);
+        }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        // An item was selected. You can retrieve the selected item using
+        // parent.getItemAtPosition(pos)
+        mIconSelection = (String) parent.getItemAtPosition(pos);
+
+        if(mIconSelection.equals("Wolf")) {
+            mIconView.setImageResource(R.drawable.wolf);
+        } else if (mIconSelection.equals("Stag")) {
+            mIconView.setImageResource(R.drawable.stag);
+        } else {
+            mIconView.setImageResource(R.drawable.default_prof);
+        }
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        // Another interface callback
     }
 
 
@@ -103,24 +147,20 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         // Reset errors.
         mEmailView.setError(null);
-        mPasswordView.setError(null);
-
         // Store values at the time of the login attempt.
+
         String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        String username = mUsernameView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
-        }
-
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(username)) {
+            mUsernameView.setError(getString(R.string.error_field_required));
+            focusView = mUsernameView;
+            cancel = true;
+        } else if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
@@ -138,17 +178,20 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(getString(R.string.most_recent_username), username);
+            editor.commit();
+            editor.putString(getString(R.string.most_recent_email), email);
+            editor.commit();
+
+            mAuthTask = new UserLoginTask(username, email, mIconSelection);
             mAuthTask.execute((Void) null);
         }
     }
 
     private boolean isEmailValid(String email) {
         return email.contains("@") && email.contains(".");
-    }
-
-    private boolean isPasswordValid(String password) {
-        return password.length() >= 4;
     }
 
     /**
@@ -206,7 +249,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<String>();
+        List<String> emails = new ArrayList<>();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             emails.add(cursor.getString(ProfileQuery.ADDRESS));
@@ -235,7 +278,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<String>(LoginActivity.this,
+                new ArrayAdapter<>(LoginActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
@@ -246,13 +289,15 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
      * the user.
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
+        //private final String mUsername;
         private final String mEmail;
-        private final String mPassword;
+        private String mUsername;
+        private String mIconId;
 
-        UserLoginTask(String email, String password) {
+        UserLoginTask(String username, String email, String iconId) {
+            mUsername = username;
             mEmail = email;
-            mPassword = password;
+            mIconId = iconId;
         }
 
         @Override
@@ -269,8 +314,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");
                 if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+                    return true;
                 }
             }
 
@@ -284,15 +328,11 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             showProgress(false);
 
             if (success) {
-
                 Intent intent = new Intent(getApplicationContext(), MapActivity.class);
-                String[] profile = {mEmail, mPassword};
+                String[] profile = {mUsername, mEmail, mIconId};
                 intent.putExtra("profile", profile);
                 finish();
                 startActivity(intent);
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
             }
         }
 
