@@ -117,14 +117,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     .anchor(0.5f, 0.5f)
                     .position(new LatLng(lastKnown.getLatitude(), lastKnown.getLongitude())));
         }
-
         LatLng southwest = new LatLng(38.031641, -78.507113);
         LatLng northeast = new LatLng(38.036096, -78.501177);
-
-        mMap.addPolygon(new PolygonOptions()
-        .add(southwest)
-        .add(northeast));
-
         LatLngBounds lawnBounds = new LatLngBounds(southwest, northeast);
         GroundOverlayOptions rotundaMapOptions = new GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.rotunda_overlay))
