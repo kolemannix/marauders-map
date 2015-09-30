@@ -5,35 +5,75 @@
     tools:context="kolemannix.com.marauderandroid.LoginActivity">
 
     <!-- Login progress -->
-    <ProgressBar android:id="@+id/login_progress" style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp" android:visibility="gone" />
+    <ProgressBar
+        android:id="@+id/login_progress" style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:background="@color/transparent"
+        android:visibility="gone"/>
 
-    <ScrollView android:id="@+id/login_form" android:layout_width="match_parent"
+    <ScrollView android:id="@+id/login_form"
+        android:layout_width="match_parent"
         android:background="@drawable/backdrop"
+        android:padding="@dimen/side_margins"
         android:scaleType="centerCrop"
         android:layout_height="match_parent">
 
-        <LinearLayout android:id="@+id/email_login_form" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:orientation="vertical">
+        <LinearLayout android:id="@+id/email_login_form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical">
 
-            <AutoCompleteTextView android:id="@+id/email" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:hint="@string/prompt_email"
-                android:inputType="textEmailAddress" android:maxLines="1"
-                android:singleLine="true" />
 
-            <EditText android:id="@+id/password" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:hint="@string/prompt_password"
-                android:imeActionId="@+id/login"
-                android:imeActionLabel="@string/action_sign_in_short"
-                android:imeOptions="actionUnspecified" android:inputType="textPassword"
-                android:maxLines="1" android:singleLine="true" />
+            <LinearLayout
+                android:id="@+id/image_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/buffer_spacing"
+                android:layout_gravity="center_horizontal"
+                android:orientation="vertical"
+                android:gravity="center">
 
-            <Button android:id="@+id/email_sign_in_button" style="?android:textAppearanceSmall"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="16dp" android:text="@string/action_sign_in"
+                <ImageView
+                    android:id="@+id/icon_view"
+                    android:layout_height="@dimen/icon_size"
+                    android:layout_width="@dimen/icon_size"
+                    android:src="@drawable/default_prof"
+                    android:layout_gravity="center_horizontal"/>
+                <Spinner
+                    android:id="@+id/icon_spinner"
+                    android:layout_marginTop="@dimen/small_spacing"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/username_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:hint="@string/prompt_username"
+                android:maxLines="1"
+                android:singleLine="true"/>
+
+            <AutoCompleteTextView
+                android:id="@+id/email_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/prompt_email"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
+                android:singleLine="true"/>
+
+            <Button android:id="@+id/sign_in_button"
+                style="?android:textAppearanceSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/action_sign_in"
                 android:textStyle="bold" />
-
         </LinearLayout>
     </ScrollView>
 

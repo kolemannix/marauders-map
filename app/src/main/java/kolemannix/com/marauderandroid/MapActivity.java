@@ -42,7 +42,7 @@ public class MapActivity extends Activity {
 
         Intent intent = getIntent();
         String[] message = intent.getStringArrayExtra("profile");
-        Log.i("profile", message[0] + "::" + message[1]);
+        Log.i("profile", message[0] + "::");
 
         mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 

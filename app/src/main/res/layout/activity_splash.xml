@@ -8,7 +8,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:background="#ffd748">
+        android:layout_alignParentStart="true">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -17,28 +17,57 @@
             android:src="@drawable/backdrop"
             android:scaleType="centerCrop"/>
 
-        <Button
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Reveal your secrets!"
-            android:id="@+id/insult_button"
-            android:layout_gravity="center_horizontal|bottom"
-            android:onClick="insult"/>
+            android:id="@+id/button_layout"
+            android:layout_gravity="center">
 
-        <TextView android:text="@string/greeting" android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:layout_gravity="center_horizontal|top"
-            android:id="@+id/splash_message_text" />
+            <TextView
+                android:id="@+id/splash_message_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="@dimen/buffer_spacing"
+                android:layout_marginStart="@dimen/side_margins"
+                android:layout_marginEnd="@dimen/side_margins"
+                android:fontFamily="cursive"
+                android:textSize="@dimen/text_font_size"
+                android:text="@string/greeting"
+                android:gravity="center"/>
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="I solemnly swear I\'m up to no good"
-            android:id="@+id/unlock_button"
-            android:layout_gravity="center"
-            android:onClick="unlock"/>
+            <TextView
+                android:id="@+id/title_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/splash_message_text"
+                android:layout_marginBottom="@dimen/buffer_spacing"
+                android:fontFamily="cursive"
+                android:textStyle="bold"
+                android:textSize="@dimen/title_font_size"
+                android:text="@string/app_title"
+                android:gravity="center"/>
+
+            <Button
+                android:id="@+id/insult_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/title_view"
+                android:text="@string/insult_button"
+                android:onClick="insult"/>
+
+            <Button
+                android:id="@+id/unlock_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="@string/secret_passphrase"
+                android:layout_below="@+id/insult_button"
+                android:onClick="unlock"/>
+        </RelativeLayout>
+
     </FrameLayout>
 
 </RelativeLayout>
