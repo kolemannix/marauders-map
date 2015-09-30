@@ -1,38 +1,37 @@
 package kolemannix.com.marauderandroid;
 
-import kolemannix.com.marauderandroid.util.SystemUiHider;
-
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.MotionEvent;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
-import android.widget.TextView;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlay;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolygonOptions;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- *
- * @see SystemUiHider
- */
-public class MapActivity extends Activity {
+public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private static final boolean AUTO_HIDE = true;
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-    private static final boolean TOGGLE_ON_CLICK = true;
-    private static final int HIDER_FLAGS = SystemUiHider.FLAG_HIDE_NAVIGATION;
+    private static final float ZOOM_LEVEL = 16.0f;
 
-    private SystemUiHider mSystemUiHider;
     private LocationManager mLocationManager;
+    private GoogleMap mMap;
+    private GroundOverlay rotundaGroundOverlay;
+    private Marker mPositionMarker;
 
+    LatLng ROTUNDA = new LatLng(38.035637, -78.503378);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,10 +40,14 @@ public class MapActivity extends Activity {
         setContentView(R.layout.activity_map);
 
         Intent intent = getIntent();
-        String[] message = intent.getStringArrayExtra("profile");
-        Log.i("profile", message[0] + "::" + message[1]);
+//        String[] message = intent.getStringArrayExtra("profile");
+//        Log.i("profile", message[0] + "::" + message[1]);
 
-        mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        MapFragment mapFragment = (MapFragment) getFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         LocationListener listener = new LocationListener() {
             @Override
@@ -70,60 +73,20 @@ public class MapActivity extends Activity {
 
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5, 5, listener);
 
-        final View controlsView = findViewById(R.id.fullscreen_content_controls);
-        final View contentView = findViewById(R.id.fullscreen_content);
+    }
 
-        // Set up an instance of SystemUiHider to control the system UI for
-        // this activity.
-        mSystemUiHider = SystemUiHider.getInstance(this, contentView, HIDER_FLAGS);
-        mSystemUiHider.setup();
-        mSystemUiHider
-                .setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
-                    // Cached values.
-                    int mControlsHeight;
-                    int mShortAnimTime;
-
-                    @Override
-                    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-                    public void onVisibilityChange(boolean visible) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-                            if (mControlsHeight == 0) {
-                                mControlsHeight = controlsView.getHeight();
-                            }
-                            if (mShortAnimTime == 0) {
-                                mShortAnimTime = getResources().getInteger(
-                                        android.R.integer.config_shortAnimTime);
-                            }
-                            controlsView.animate()
-                                    .translationY(visible ? 0 : mControlsHeight)
-                                    .setDuration(mShortAnimTime);
-                        } else {
-                            controlsView.setVisibility(visible ? View.VISIBLE : View.GONE);
-                        }
-                        if (visible && AUTO_HIDE) {
-                            // Schedule a hide().
-                            delayedHide(AUTO_HIDE_DELAY_MILLIS);
-                        }
-                    }
-                });
-
-        // Set up the user interaction to manually show or hide the system UI.
-        contentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (TOGGLE_ON_CLICK) {
-                    mSystemUiHider.toggle();
-                } else {
-                    mSystemUiHider.show();
-                }
-            }
-        });
-
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+    private Location lastKnownLocation() {
+        Location gpsLast = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        Location networkLast = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        Location passiveLast = mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+        if (gpsLast != null) return gpsLast;
+        if (networkLast != null) return networkLast;
+        if (passiveLast != null) return passiveLast;
+        return null;
     }
 
     private void updateLocation(Location location) {
-        ((TextView)findViewById(R.id.fullscreen_content)).setText(location.getLatitude() + ", " + location.getLongitude());
+        panToLocation(location);
     }
 
     public void mischiefManaged(View view) {
@@ -132,45 +95,50 @@ public class MapActivity extends Activity {
         System.exit(0);
     }
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
+    private void panToLocation(Location location) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, ZOOM_LEVEL);
+        mMap.animateCamera(cameraUpdate);
     }
 
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
-        }
-    };
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        // Got mah map!
+        mMap = googleMap;
 
-    Handler mHideHandler = new Handler();
-    Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mSystemUiHider.hide();
+        Location lastKnown = lastKnownLocation();
+        if (lastKnown != null) {
+            panToLocation(lastKnown);
+            mPositionMarker = mMap.addMarker(new MarkerOptions()
+                    .flat(true)
+                    .icon(BitmapDescriptorFactory
+                            .fromResource(R.drawable.mouse_64))
+                    .anchor(0.5f, 0.5f)
+                    .position(new LatLng(lastKnown.getLatitude(), lastKnown.getLongitude())));
         }
-    };
 
-    /**
-     * Schedules a call to hide() in [delay] milliseconds, canceling any
-     * previously scheduled calls.
-     */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
+        LatLng southwest = new LatLng(38.031641, -78.507113);
+        LatLng northeast = new LatLng(38.036096, -78.501177);
+
+        mMap.addPolygon(new PolygonOptions()
+        .add(southwest)
+        .add(northeast));
+
+        LatLngBounds lawnBounds = new LatLngBounds(southwest, northeast);
+        GroundOverlayOptions rotundaMapOptions = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.rotunda_overlay))
+                .anchor(1, 0)
+                .bearing(22.5f)
+                .position(northeast, 350);
+
+        GroundOverlayOptions parchmentTextureOptions = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.parchment_texture_small))
+                .transparency(0.30f)
+                .position(ROTUNDA, 2000, 1300);
+
+//        rotundaGroundOverlay = googleMap.addGroundOverlay(rotundaMapOptions);
+        rotundaGroundOverlay = mMap.addGroundOverlay(parchmentTextureOptions);
+
+        mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
     }
 }
