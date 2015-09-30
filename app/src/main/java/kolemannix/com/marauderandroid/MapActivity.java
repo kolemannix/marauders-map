@@ -7,6 +7,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,8 +41,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         setContentView(R.layout.activity_map);
 
         Intent intent = getIntent();
-//        String[] message = intent.getStringArrayExtra("profile");
-//        Log.i("profile", message[0] + "::" + message[1]);
+        String[] profile = intent.getStringArrayExtra("profile");
+        Log.i("profile", "Username: " + profile[0] +  ", Email: " + profile[1] + ", Icon: " + profile[2]);
 
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
