@@ -8,6 +8,7 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,6 +28,8 @@ public class SplashActivity extends Activity {
     Map<MarauderProfile, Location> locations = null;
     private final int REQ_CODE_SPEECH_INPUT = 100;
 
+    static final String INSULT_NUM = "insultIndex";
+
     TextView mMessageView;
     Button mInsultButton;
     Button mUnlockButton;
@@ -43,7 +46,14 @@ public class SplashActivity extends Activity {
         mMessageView = (TextView)findViewById(R.id.splash_message_text);
         mInsultButton = (Button)findViewById(R.id.insult_button);
         mUnlockButton = (Button)findViewById(R.id.unlock_button);
-        insultIndex = 0;
+
+        if(savedInstanceState != null) {
+            insultIndex = savedInstanceState.getInt(INSULT_NUM);
+        }
+
+        String insult = getString(insult_ids[insultIndex]);
+        mMessageView.setText(insult);
+
 
         // Launch asynchronous listener process
         locations = Service.getLocations();
@@ -87,8 +97,8 @@ public class SplashActivity extends Activity {
     }
 
     public void insult(View view) {
-        String insult = getString(insult_ids[insultIndex]);
         insultIndex = (insultIndex + 1) % 4;
+        String insult = getString(insult_ids[insultIndex]);
         mMessageView.setText(insult);
     }
 
@@ -109,6 +119,15 @@ public class SplashActivity extends Activity {
 
     private MarauderProfile checkStorage() {
         return null;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save the user's current game state
+        savedInstanceState.putInt(INSULT_NUM, insultIndex);
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
     }
 
 }
