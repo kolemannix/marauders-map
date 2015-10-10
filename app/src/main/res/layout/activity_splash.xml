@@ -51,23 +51,15 @@
                 android:text="@string/app_title"
                 android:gravity="center"/>
 
-            <Button
-                android:id="@+id/insult_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@+id/title_view"
-                android:text="@string/insult_button"
-                android:onClick="insult"/>
 
-            <Button
-                android:id="@+id/unlock_button"
+            <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:text="@string/secret_passphrase"
-                android:layout_below="@+id/insult_button"
-                android:onClick="unlock"/>
+                android:src="@android:drawable/ic_btn_speak_now"
+                android:id="@+id/listen_button"
+                android:layout_below="@+id/title_view"
+                android:onClick="listen"
+                android:layout_centerHorizontal="true" />
         </RelativeLayout>
 
     </FrameLayout>

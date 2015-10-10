@@ -16,13 +16,16 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="prompt_username">Username</string>
-    <string name="most_recent_username">username</string>
-    <string name="most_recent_email">email</string>
-    <string name="most_recent_icon_id">icon_id</string>
+    <string name="stored_username">username</string>
+    <string name="stored_email">email</string>
+    <string name="stored_icon_id">icon_id</string>
+    <string name="def_username">DEF_USER</string>
+    <string name="def_email">DEF_EMAIL</string>
     <string name="login_preferences_file_key">kolemannix.com.marauderandroid.loginpreferences</string>
     <string-array name="icon_names">
         <item>Hallows</item>
         <item>Wolf</item>
         <item>Stag</item>
+        <item>Rat</item>
     </string-array>
 </resources>

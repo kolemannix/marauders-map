@@ -29,6 +29,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
+import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,20 +38,13 @@ import java.util.List;
  */
 public class LoginActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
-
     // UI references.
     private EditText mEmailView;
     private EditText mUsernameView;
-    private View mProgressView;
-    private View mLoginFormView;
     private SharedPreferences sharedPref;
     private ImageView mIconView;
     private Spinner mIconSpinner;
-    private final int[] ICONS = {R.drawable.hallows, R.drawable.wolf, R.drawable.stag};
+    private final int[] ICONS = {R.drawable.hallows, R.drawable.wolf, R.drawable.stag, R.drawable.mouse_64};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,47 +76,35 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
             }
         });
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
     }
 
     private void setupSharedPreferences() {
         sharedPref = this.getSharedPreferences(
                 getString(R.string.login_preferences_file_key), Context.MODE_PRIVATE);
+        String defaultUsername = getString(R.string.def_username);
+        String defaultEmail = getString(R.string.def_email);
 
-        String recent_username = sharedPref.getString(getString(R.string.most_recent_username), "Nickname");
-        String recent_email = sharedPref.getString(getString(R.string.most_recent_email), "Email");
+        String storedUsername = sharedPref.getString(getString(R.string.stored_username), defaultUsername);
+        String storedEmail = sharedPref.getString(getString(R.string.stored_email), defaultEmail);
 
-        if (recent_username.contentEquals("Nickname")) {
-            mUsernameView.setHint(recent_username);
+        if (storedUsername.contentEquals(defaultUsername)) {
+            mUsernameView.setHint(storedUsername);
         } else {
-            mUsernameView.setText(recent_username);
+            mUsernameView.setText(storedUsername);
         }
 
-        if (recent_email.contentEquals("Email")) {
-            mEmailView.setHint(recent_email);
+        if (storedEmail.contentEquals(defaultEmail)) {
+            mEmailView.setHint(storedEmail);
         } else {
-            mEmailView.setText(recent_email);
+            mEmailView.setText(storedEmail);
         }
 
-        mIconSpinner.setSelection(sharedPref.getInt(getString(R.string.most_recent_icon_id), 0));
+        mIconSpinner.setSelection(sharedPref.getInt(getString(R.string.stored_icon_id), 0));
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        // An item was selected. You can retrieve the selected item using
-        // parent.getItemAtPosition(pos)
-
         mIconView.setImageResource(ICONS[pos]);
-//
-//        if(mIconSelection.equals("Wolf")) {
-//            mIconView.setImageResource(R.drawable.wolf);
-//        } else if (mIconSelection.equals("Stag")) {
-//            mIconView.setImageResource(R.drawable.stag);
-//        } else {
-//            mIconView.setImageResource(R.drawable.default_prof);
-//        }
-
     }
 
     @Override
@@ -137,10 +119,6 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
      * errors are presented and no actual login attempt is made.
      */
     public void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
         // Reset errors.
         mEmailView.setError(null);
         // Store values at the time of the login attempt.
@@ -171,110 +149,29 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
             // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-
-            String iconIDAsString = Integer.toString(mIconSpinner.getSelectedItemPosition());
+            int iconID = mIconSpinner.getSelectedItemPosition();
+            String iconIDAsString = Integer.toString(iconID);
 
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString(getString(R.string.most_recent_username), username);
-            editor.putString(getString(R.string.most_recent_email), email);
-            editor.putInt(getString(R.string.most_recent_icon_id), mIconSpinner.getSelectedItemPosition());
+            editor.putString(getString(R.string.stored_username), username);
+            editor.putString(getString(R.string.stored_email), email);
+            editor.putInt(getString(R.string.stored_icon_id), iconID);
             editor.apply();
 
-            mAuthTask = new UserLoginTask(username, email, iconIDAsString);
-            mAuthTask.execute((Void) null);
+            MarauderProfile prof = new MarauderProfile(email, username, iconID);
+            continueToMap(prof);
         }
+    }
+
+    private void continueToMap(MarauderProfile profile) {
+        Intent intent = new Intent(this, MapActivity.class);
+        intent.putExtra("profile",  profile.toStringArray());
+        startActivity(intent);
     }
 
     private boolean isEmailValid(String email) {
         return email.contains("@") && email.contains(".");
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    public void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private String mUsername;
-        private String mIconId;
-
-        UserLoginTask(String username, String email, String iconId) {
-            mUsername = username;
-            mEmail = email;
-            mIconId = iconId;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt login against a network service.
-            try {
-                // Simulate network access.
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                Intent intent = new Intent(getApplicationContext(), MapActivity.class);
-                String[] profile = {mUsername, mEmail, mIconId};
-                intent.putExtra("profile", profile);
-                finish();
-                startActivity(intent);
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
 }
 
