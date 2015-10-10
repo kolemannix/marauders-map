@@ -77,6 +77,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         setContentView(R.layout.activity_map);
 
         Intent intent = getIntent();
+        
         mProfile = MarauderProfile.fromStringArray(intent.getStringArrayExtra("profile"));
 
 //        Log.i("profile", "Username: " + mProfile.nickname + ", Email: " + mProfile.email + ", Icon: " + mProfile.icon);

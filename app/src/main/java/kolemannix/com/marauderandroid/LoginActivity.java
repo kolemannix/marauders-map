@@ -88,13 +88,13 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
         String storedEmail = sharedPref.getString(getString(R.string.stored_email), defaultEmail);
 
         if (storedUsername.contentEquals(defaultUsername)) {
-            mUsernameView.setHint(storedUsername);
+            mUsernameView.setHint("Nickname");
         } else {
             mUsernameView.setText(storedUsername);
         }
 
         if (storedEmail.contentEquals(defaultEmail)) {
-            mEmailView.setHint(storedEmail);
+            mEmailView.setHint("Email");
         } else {
             mEmailView.setText(storedEmail);
         }

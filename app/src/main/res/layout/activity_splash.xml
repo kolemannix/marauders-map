@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/splash_layout"
     tools:context="kolemannix.com.marauderandroid.SplashActivity">
 
     <ImageView
@@ -34,7 +35,7 @@
                 android:layout_marginStart="@dimen/side_margins"
                 android:layout_marginEnd="@dimen/side_margins"
                 android:fontFamily="cursive"
-                android:textSize="@dimen/text_font_size"
+                android:textSize="@dimen/title_font_size"
                 android:text="@string/greeting"
                 android:gravity="center"/>
 

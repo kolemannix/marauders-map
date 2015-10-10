@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
@@ -31,15 +32,19 @@ public class SplashActivity extends Activity {
     Map<MarauderProfile, Location> locations = null;
 
     static final String INSULT_NUM = "insultIndex";
+    static final String INSULTING = "insulting";
+    static final String RESET = "reset";
 
     TextView mMessageView;
-    Button mInsultButton;
-    Button mUnlockButton;
+    TextView mTitleView;
     int insultIndex;
     int[] insult_ids = {R.string.insult_1, R.string.insult_2, R.string.insult_3, R.string.insult_4};
 
     private Intent mRecognizerIntent;
+    private boolean insulting = false;
+    private boolean shouldReset = false;
     private final int RESULT_SPEECH = 1337;
+    private final String TITLE_MESSAGE = "titleMessage";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +55,24 @@ public class SplashActivity extends Activity {
         mRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, "en-US");
 
         mMessageView = (TextView)findViewById(R.id.splash_message_text);
+        mTitleView = (TextView)findViewById(R.id.title_view);
+
+        insultIndex = -1;
 
         if(savedInstanceState != null) {
-            insultIndex = savedInstanceState.getInt(INSULT_NUM);
-            String insult = getString(insult_ids[insultIndex]);
-            mMessageView.setText(insult);
+            shouldReset = savedInstanceState.getBoolean(RESET);
+            insulting = savedInstanceState.getBoolean(INSULTING);
+            if (shouldReset) {
+                resetToStartText();
+                shouldReset = false;
+            } else if (insulting) {
+                insultIndex = savedInstanceState.getInt(INSULT_NUM);
+                if (insultIndex != -1) {
+                    String insult = getString(insult_ids[insultIndex]);
+                    mMessageView.setText(insult);
+                }
+            }
         }
-
         // Launch asynchronous listener process
         locations = Service.getLocations();
     }
@@ -83,9 +99,18 @@ public class SplashActivity extends Activity {
     }
 
     public void insult() {
+        insulting = true;
         insultIndex = (insultIndex + 1) % 4;
         String insult = getString(insult_ids[insultIndex]);
         mMessageView.setText(insult);
+        mTitleView.setText("Access Denied");
+    }
+
+    public void resetToStartText() {
+        insulting = false;
+        insultIndex = -1;
+        mMessageView.setText(getString(R.string.greeting));
+        mTitleView.setText(getString(R.string.app_title));
     }
 
     public void unlock() {
@@ -93,13 +118,21 @@ public class SplashActivity extends Activity {
         MarauderProfile profile = checkStorage();
         if (profile != null) {
             // Launch the map activity
+            mTitleView.setText("Welcome, Mischief-Maker...");
+            mMessageView.setText("");
+            View v = findViewById(R.id.splash_layout);
+            v.invalidate();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) { }
             Intent intent = new Intent(this, MapActivity.class);
             intent.putExtra("profile", profile.toStringArray());
+            shouldReset = true;
             startActivity(intent);
-
         } else {
             // Launch registration activity
             Intent intent = new Intent(this, LoginActivity.class);
+            shouldReset = true;
             startActivity(intent);
         }
     }
@@ -129,7 +162,10 @@ public class SplashActivity extends Activity {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         // Save the user's current game state
+        savedInstanceState.putBoolean(RESET, shouldReset);
+        savedInstanceState.putBoolean(INSULTING, insulting);
         savedInstanceState.putInt(INSULT_NUM, insultIndex);
+        savedInstanceState.putString(TITLE_MESSAGE, mTitleView.getText().toString());
 
         // Always call the superclass so it can save the view hierarchy state
         super.onSaveInstanceState(savedInstanceState);
