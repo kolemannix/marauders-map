@@ -52,15 +52,59 @@
                 android:text="@string/app_title"
                 android:gravity="center"/>
 
-
-            <ImageButton
+            <LinearLayout
+                android:id="@+id/button_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_btn_speak_now"
-                android:id="@+id/listen_button"
+                android:layout_centerHorizontal="true"
                 android:layout_below="@+id/title_view"
-                android:onClick="listen"
-                android:layout_centerHorizontal="true" />
+                android:orientation="horizontal">
+
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/ic_btn_speak_now"
+                    android:id="@+id/listen_button"
+                    android:onClick="listen"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginEnd="10dp"/>
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/ic_menu_edit"
+                    android:id="@+id/write_button"
+                    android:onClick="typePassphrase" />
+            </LinearLayout>
+
+            <EditText
+                android:layout_below="@id/button_container"
+                android:id="@+id/enter_passphrase_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/enter_passphrase"
+                android:layout_marginTop="@dimen/buffer_spacing"
+                android:layout_marginBottom="@dimen/buffer_spacing"
+                android:layout_marginLeft="@dimen/side_margins"
+                android:layout_marginRight="@dimen/side_margins"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/enter_passphrase_button"
+                android:layout_below="@id/enter_passphrase_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/side_margins"
+                android:paddingRight="@dimen/side_margins"
+                android:layout_centerHorizontal="true"
+                android:text="@string/enter"
+                android:onClick="enterPassphrase"
+                android:visibility="gone"/>
+
+
         </RelativeLayout>
 
     </FrameLayout>

@@ -137,6 +137,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         }
     }
 
+    public void updateProfile(View view) {
+        Intent intent = new Intent(this, UpdateProfileActivity.class);
+        startActivity(intent);
+    }
+
+
     private LatLng moveRandomly(LatLng start) {
         Random random = new Random();
         double lat = start.latitude + (random.nextBoolean() ? MOVE_SPEED : MOVE_SPEED * -1.0);

@@ -19,12 +19,13 @@ import android.widget.Spinner;
 /**
  * A login screen that offers login via username & email.
  */
-public class LoginActivity extends Activity implements AdapterView.OnItemSelectedListener {
+public class UpdateProfileActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
     // UI references.
     private EditText mEmailView;
     private EditText mUsernameView;
-    private SharedPreferences sharedPref;
+    private EditText mCustomizePassphrase;
+    private SharedPreferences mSharedPref;
     private ImageView mIconView;
     private Spinner mIconSpinner;
     private final int[] ICONS = {R.drawable.hallows, R.drawable.wolf, R.drawable.stag, R.drawable.mouse_64};
@@ -32,7 +33,7 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.update_profile);
 
         // Set up the icon selector
 
@@ -48,6 +49,7 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username_view);
         mEmailView = (EditText) findViewById(R.id.email_view);
+        mCustomizePassphrase = (EditText) findViewById(R.id.customize_passphrase);
 
         setupSharedPreferences();
 
@@ -62,13 +64,15 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
     }
 
     private void setupSharedPreferences() {
-        sharedPref = this.getSharedPreferences(
+        mSharedPref = this.getSharedPreferences(
                 getString(R.string.login_preferences_file_key), Context.MODE_PRIVATE);
         String defaultUsername = getString(R.string.def_username);
         String defaultEmail = getString(R.string.def_email);
+        String defaultPassphrase = getString(R.string.def_passphrase);
 
-        String storedUsername = sharedPref.getString(getString(R.string.stored_username), defaultUsername);
-        String storedEmail = sharedPref.getString(getString(R.string.stored_email), defaultEmail);
+        String storedUsername = mSharedPref.getString(getString(R.string.stored_username), defaultUsername);
+        String storedEmail = mSharedPref.getString(getString(R.string.stored_email), defaultEmail);
+        String storedPassphrase = mSharedPref.getString(getString(R.string.stored_custom_password), defaultPassphrase);
 
         if (storedUsername.contentEquals(defaultUsername)) {
             mUsernameView.setHint("Nickname");
@@ -82,7 +86,13 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
             mEmailView.setText(storedEmail);
         }
 
-        mIconSpinner.setSelection(sharedPref.getInt(getString(R.string.stored_icon_id), 0));
+        if (storedEmail.contentEquals(defaultPassphrase)) {
+            mCustomizePassphrase.setHint("Unlock");
+        } else {
+            mCustomizePassphrase.setText(storedPassphrase);
+        }
+
+        mIconSpinner.setSelection(mSharedPref.getInt(getString(R.string.stored_icon_id), 0));
     }
 
     @Override
@@ -108,6 +118,7 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
 
         String email = mEmailView.getText().toString();
         String username = mUsernameView.getText().toString();
+        String passphrase = mCustomizePassphrase.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -125,6 +136,10 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
+        } else if (TextUtils.isEmpty(passphrase)) {
+            mCustomizePassphrase.setError(getString(R.string.error_field_required));
+            focusView = mCustomizePassphrase;
+            cancel = true;
         }
 
         if (cancel) {
@@ -135,10 +150,11 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
             int iconID = mIconSpinner.getSelectedItemPosition();
             String iconIDAsString = Integer.toString(iconID);
 
-            SharedPreferences.Editor editor = sharedPref.edit();
+            SharedPreferences.Editor editor = mSharedPref.edit();
             editor.putString(getString(R.string.stored_username), username);
             editor.putString(getString(R.string.stored_email), email);
             editor.putInt(getString(R.string.stored_icon_id), iconID);
+            editor.putString(getString(R.string.stored_custom_password), passphrase);
             editor.apply();
 
             MarauderProfile prof = new MarauderProfile(email, username, iconID);
@@ -157,4 +173,3 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
     }
 
 }
-

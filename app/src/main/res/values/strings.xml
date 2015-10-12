@@ -19,8 +19,15 @@
     <string name="stored_username">username</string>
     <string name="stored_email">email</string>
     <string name="stored_icon_id">icon_id</string>
+    <string name="enter">Enter</string>
+    <string name="stored_custom_password">custom_password</string>
+    <string name="customize_passphrase">Customize your Passphrase</string>
+    <string name="enter_passphrase">Enter the Secret Passphrase</string>
     <string name="def_username">DEF_USER</string>
     <string name="def_email">DEF_EMAIL</string>
+    <string name="def_passphrase">unlock</string>
+    <string name="update_profile_button_text">Update Profile</string>
+    <string name="action_return_to_map">Finish</string>
     <string name="login_preferences_file_key">kolemannix.com.marauderandroid.loginpreferences</string>
     <string-array name="icon_names">
         <item>Hallows</item>

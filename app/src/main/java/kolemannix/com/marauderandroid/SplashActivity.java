@@ -18,6 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,15 +36,23 @@ public class SplashActivity extends Activity {
     static final String INSULT_NUM = "insultIndex";
     static final String INSULTING = "insulting";
     static final String RESET = "reset";
+    static final String TYPING_ENABLED = "typing_enabled";
 
     TextView mMessageView;
     TextView mTitleView;
+    EditText mEnterPassphrase;
+    Button mEnterButton;
+
     int insultIndex;
     int[] insult_ids = {R.string.insult_1, R.string.insult_2, R.string.insult_3, R.string.insult_4};
 
     private Intent mRecognizerIntent;
+    private SharedPreferences mSharedPref;
+
+    private String customPassword;
     private boolean insulting = false;
     private boolean shouldReset = false;
+    private boolean shouldDisplayTypingOption = false;
     private final int RESULT_SPEECH = 1337;
     private final String TITLE_MESSAGE = "titleMessage";
 
@@ -56,8 +66,15 @@ public class SplashActivity extends Activity {
 
         mMessageView = (TextView)findViewById(R.id.splash_message_text);
         mTitleView = (TextView)findViewById(R.id.title_view);
+        mEnterPassphrase = (EditText)findViewById(R.id.enter_passphrase_view);
+        mEnterButton = (Button) findViewById(R.id.enter_passphrase_button);
 
         insultIndex = -1;
+
+        mSharedPref = this.getSharedPreferences(
+                getString(R.string.login_preferences_file_key), Context.MODE_PRIVATE);
+        customPassword = mSharedPref.getString(getString(R.string.stored_custom_password),
+                "unlock").toLowerCase();
 
         if(savedInstanceState != null) {
             shouldReset = savedInstanceState.getBoolean(RESET);
@@ -71,6 +88,12 @@ public class SplashActivity extends Activity {
                     String insult = getString(insult_ids[insultIndex]);
                     mMessageView.setText(insult);
                 }
+            }
+
+            shouldDisplayTypingOption = savedInstanceState.getBoolean(TYPING_ENABLED);
+            if (shouldDisplayTypingOption) {
+                mEnterPassphrase.setVisibility(View.VISIBLE);
+                mEnterButton.setVisibility(View.VISIBLE);
             }
         }
         // Launch asynchronous listener process
@@ -91,7 +114,8 @@ public class SplashActivity extends Activity {
         Log.i("Said", s);
         if (s.toLowerCase().contentEquals("unlock")
                 || s.toLowerCase().contentEquals("i solemnly swear i'm up to no good")
-                || s.toLowerCase().contentEquals("i solemnly swear i am up to no good")) {
+                || s.toLowerCase().contentEquals("i solemnly swear i am up to no good")
+                || s.toLowerCase().contentEquals(customPassword)) {
             unlock();
         } else {
             insult();
@@ -119,6 +143,12 @@ public class SplashActivity extends Activity {
         if (profile != null) {
             // Launch the map activity
             mTitleView.setText("Welcome, Mischief-Maker...");
+
+            findViewById(R.id.listen_button).setVisibility(View.INVISIBLE);
+            findViewById(R.id.write_button).setVisibility(View.INVISIBLE);
+            mEnterButton.setVisibility(View.INVISIBLE);
+            mEnterPassphrase.setVisibility(View.INVISIBLE);
+
             mMessageView.setText("");
             View v = findViewById(R.id.splash_layout);
             v.invalidate();
@@ -139,6 +169,25 @@ public class SplashActivity extends Activity {
 
     public void listen(View view) {
         startActivityForResult(mRecognizerIntent, RESULT_SPEECH);
+    }
+
+    public void typePassphrase(View view) {
+        mEnterPassphrase.setVisibility(View.VISIBLE);
+        mEnterButton.setVisibility(View.VISIBLE);
+        shouldDisplayTypingOption = true;
+    }
+
+    public void enterPassphrase(View view) {
+        String userInput = mEnterPassphrase.getText().toString().toLowerCase();
+
+        if (userInput.contentEquals("unlock")
+                || userInput.contentEquals("i solemnly swear i'm up to no good")
+                || userInput.contentEquals("i solemnly swear i am up to no good")
+                || userInput.contentEquals(customPassword)) {
+            unlock();
+        } else {
+            insult();
+        }
     }
 
     private MarauderProfile checkStorage() {
@@ -166,6 +215,7 @@ public class SplashActivity extends Activity {
         savedInstanceState.putBoolean(INSULTING, insulting);
         savedInstanceState.putInt(INSULT_NUM, insultIndex);
         savedInstanceState.putString(TITLE_MESSAGE, mTitleView.getText().toString());
+        savedInstanceState.putBoolean(TYPING_ENABLED, shouldDisplayTypingOption);
 
         // Always call the superclass so it can save the view hierarchy state
         super.onSaveInstanceState(savedInstanceState);
