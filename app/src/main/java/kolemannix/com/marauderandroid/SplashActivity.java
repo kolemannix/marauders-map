@@ -1,31 +1,23 @@
 package kolemannix.com.marauderandroid;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class SplashActivity extends Activity {
@@ -34,8 +26,6 @@ public class SplashActivity extends Activity {
     Map<MarauderProfile, Location> locations = null;
 
     static final String INSULT_NUM = "insultIndex";
-    static final String INSULTING = "insulting";
-    static final String RESET = "reset";
     static final String TYPING_ENABLED = "typing_enabled";
 
     TextView mMessageView;
@@ -49,9 +39,6 @@ public class SplashActivity extends Activity {
     private Intent mRecognizerIntent;
     private SharedPreferences mSharedPref;
 
-    private String customPassword;
-    private boolean insulting = false;
-    private boolean shouldReset = false;
     private boolean shouldDisplayTypingOption = false;
     private final int RESULT_SPEECH = 1337;
     private final String TITLE_MESSAGE = "titleMessage";
@@ -69,32 +56,37 @@ public class SplashActivity extends Activity {
         mEnterPassphrase = (EditText)findViewById(R.id.enter_passphrase_view);
         mEnterButton = (Button) findViewById(R.id.enter_passphrase_button);
 
-        insultIndex = -1;
+//        mEnterPassphrase.setImeActionLabel("Go", KeyEvent.KEYCODE_ENTER);
+        mEnterPassphrase.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                Log.i("Hi mom!", Integer.toString(actionId));
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_SEND) {
+                    checkInput(v.getText().toString());
+                    handled = true;
+                }
+                return handled;
+            }
+        });
 
         mSharedPref = this.getSharedPreferences(
                 getString(R.string.login_preferences_file_key), Context.MODE_PRIVATE);
-        customPassword = mSharedPref.getString(getString(R.string.stored_custom_password),
-                "unlock").toLowerCase();
 
         if(savedInstanceState != null) {
-            shouldReset = savedInstanceState.getBoolean(RESET);
-            insulting = savedInstanceState.getBoolean(INSULTING);
-            if (shouldReset) {
-                resetToStartText();
-                shouldReset = false;
-            } else if (insulting) {
-                insultIndex = savedInstanceState.getInt(INSULT_NUM);
-                if (insultIndex != -1) {
-                    String insult = getString(insult_ids[insultIndex]);
-                    mMessageView.setText(insult);
-                }
+            insultIndex = savedInstanceState.getInt(INSULT_NUM, -1);
+            if (insultIndex != -1) {
+                String insult = getString(insult_ids[insultIndex]);
+                mMessageView.setText(insult);
+                mTitleView.setText("Access Denied");
             }
-
             shouldDisplayTypingOption = savedInstanceState.getBoolean(TYPING_ENABLED);
             if (shouldDisplayTypingOption) {
                 mEnterPassphrase.setVisibility(View.VISIBLE);
                 mEnterButton.setVisibility(View.VISIBLE);
             }
+        } else {
+            insultIndex = -1;
         }
         // Launch asynchronous listener process
         locations = Service.getLocations();
@@ -105,13 +97,16 @@ public class SplashActivity extends Activity {
         if (requestCode == RESULT_SPEECH) {
             if (resultCode == RESULT_OK) {
                 ArrayList<String> speechInput = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                checkSpeechInput(speechInput.get(0));
+                checkInput(speechInput.get(0));
             }
         }
     }
 
-    private void checkSpeechInput(String s) {
-        Log.i("Said", s);
+    private void checkInput(String s) {
+        String customPassword = mSharedPref.getString(getString(R.string.stored_custom_password),
+                "unlock").toLowerCase();
+        Log.i("Said vs Password", s + " +vs+ " + customPassword);
+
         if (s.toLowerCase().contentEquals("unlock")
                 || s.toLowerCase().contentEquals("i solemnly swear i'm up to no good")
                 || s.toLowerCase().contentEquals("i solemnly swear i am up to no good")
@@ -123,18 +118,19 @@ public class SplashActivity extends Activity {
     }
 
     public void insult() {
-        insulting = true;
         insultIndex = (insultIndex + 1) % 4;
         String insult = getString(insult_ids[insultIndex]);
         mMessageView.setText(insult);
         mTitleView.setText("Access Denied");
     }
 
-    public void resetToStartText() {
-        insulting = false;
+    public void resetToStartState() {
         insultIndex = -1;
         mMessageView.setText(getString(R.string.greeting));
         mTitleView.setText(getString(R.string.app_title));
+        mEnterPassphrase.setText("  ");
+        mEnterButton.setVisibility(View.INVISIBLE);
+        mEnterPassphrase.setVisibility(View.INVISIBLE);
     }
 
     public void unlock() {
@@ -142,27 +138,15 @@ public class SplashActivity extends Activity {
         MarauderProfile profile = checkStorage();
         if (profile != null) {
             // Launch the map activity
-            mTitleView.setText("Welcome, Mischief-Maker...");
-
-            findViewById(R.id.listen_button).setVisibility(View.INVISIBLE);
-            findViewById(R.id.write_button).setVisibility(View.INVISIBLE);
-            mEnterButton.setVisibility(View.INVISIBLE);
-            mEnterPassphrase.setVisibility(View.INVISIBLE);
-
-            mMessageView.setText("");
-            View v = findViewById(R.id.splash_layout);
-            v.invalidate();
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) { }
+            Toast.makeText(this, "Welcome, Mischief Maker", Toast.LENGTH_LONG).show();
             Intent intent = new Intent(this, MapActivity.class);
             intent.putExtra("profile", profile.toStringArray());
-            shouldReset = true;
+            resetToStartState();
             startActivity(intent);
         } else {
             // Launch registration activity
             Intent intent = new Intent(this, LoginActivity.class);
-            shouldReset = true;
+            resetToStartState();
             startActivity(intent);
         }
     }
@@ -174,20 +158,15 @@ public class SplashActivity extends Activity {
     public void typePassphrase(View view) {
         mEnterPassphrase.setVisibility(View.VISIBLE);
         mEnterButton.setVisibility(View.VISIBLE);
+        mEnterPassphrase.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(mEnterPassphrase, InputMethodManager.SHOW_IMPLICIT);
         shouldDisplayTypingOption = true;
     }
 
     public void enterPassphrase(View view) {
         String userInput = mEnterPassphrase.getText().toString().toLowerCase();
-
-        if (userInput.contentEquals("unlock")
-                || userInput.contentEquals("i solemnly swear i'm up to no good")
-                || userInput.contentEquals("i solemnly swear i am up to no good")
-                || userInput.contentEquals(customPassword)) {
-            unlock();
-        } else {
-            insult();
-        }
+        checkInput(userInput);
     }
 
     private MarauderProfile checkStorage() {
@@ -211,8 +190,6 @@ public class SplashActivity extends Activity {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         // Save the user's current game state
-        savedInstanceState.putBoolean(RESET, shouldReset);
-        savedInstanceState.putBoolean(INSULTING, insulting);
         savedInstanceState.putInt(INSULT_NUM, insultIndex);
         savedInstanceState.putString(TITLE_MESSAGE, mTitleView.getText().toString());
         savedInstanceState.putBoolean(TYPING_ENABLED, shouldDisplayTypingOption);

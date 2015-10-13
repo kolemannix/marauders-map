@@ -148,7 +148,6 @@ public class UpdateProfileActivity extends Activity implements AdapterView.OnIte
             focusView.requestFocus();
         } else {
             int iconID = mIconSpinner.getSelectedItemPosition();
-            String iconIDAsString = Integer.toString(iconID);
 
             SharedPreferences.Editor editor = mSharedPref.edit();
             editor.putString(getString(R.string.stored_username), username);
@@ -163,9 +162,10 @@ public class UpdateProfileActivity extends Activity implements AdapterView.OnIte
     }
 
     private void continueToMap(MarauderProfile profile) {
-        Intent intent = new Intent(this, MapActivity.class);
-        intent.putExtra("profile",  profile.toStringArray());
-        startActivity(intent);
+        Intent resultIntent = new Intent();
+        setResult(Activity.RESULT_OK, resultIntent);
+        resultIntent.putExtra("profile",  profile.toStringArray());
+        finish();
     }
 
     private boolean isEmailValid(String email) {

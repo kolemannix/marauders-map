@@ -6,35 +6,33 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
+
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private static final float ZOOM_LEVEL = 16.0f;
+    private static final float ZOOM_LEVEL = 18.0f;
 
     private LocationManager mLocationManager;
     private GoogleMap mMap;
-    private GroundOverlay rotundaGroundOverlay;
 
     private MarauderProfile mProfile;
     private LatLng mMyLatLng;
@@ -47,12 +45,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private Marker mMyMarker;
 
     // CONSTANTS
+    public static final int REQUEST_NEW_PROFILE = 100;
     private final int[] ICONS = {R.drawable.hallows_64, R.drawable.wolf_64, R.drawable.stag_64, R.drawable.mouse_64};
     private static final LatLng ROTUNDA = new LatLng(38.035637, -78.503378);
     private static final LatLng RICE_HALL = new LatLng(38.031713, -78.511050);
 
-    private static final double MOVE_SPEED = 0.0005f;
-    private static final int POLL_INTERVAL = 3000;
+    private static final double MOVE_SPEED = 0.000025f;
+    private static final int POLL_INTERVAL = 250;
 
     private static final Map<MarauderProfile, LatLng> STATIC_TEST_LOCATIONS;
 
@@ -80,7 +79,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         
         mProfile = MarauderProfile.fromStringArray(intent.getStringArrayExtra("profile"));
 
-//        Log.i("profile", "Username: " + mProfile.nickname + ", Email: " + mProfile.email + ", Icon: " + mProfile.icon);
+
         first = true;
         markers = new HashMap<MarauderProfile, Marker>();
 
@@ -111,7 +110,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             }
         };
 
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5, 5, listener);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 5.0f, listener);
 
         mApiRunnable = new ApiRunnable();
         mApiThread = new Thread(mApiRunnable);
@@ -137,26 +136,40 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         }
     }
 
-    public void updateProfile(View view) {
-        Intent intent = new Intent(this, UpdateProfileActivity.class);
-        startActivity(intent);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_NEW_PROFILE) {
+            if (resultCode == RESULT_OK) {
+                mProfile = MarauderProfile.fromStringArray(data.getStringArrayExtra("profile"));
+                Log.i("New profile!", mProfile.toStringArray().toString());
+                mMyMarker.remove();
+                mMyMarker = mMap.addMarker(optionsForPair(mProfile, mMyLatLng));
+            }
+        }
     }
 
+    public void updateProfile(View view) {
+        Intent intent = new Intent(this, UpdateProfileActivity.class);
+        startActivityForResult(intent, REQUEST_NEW_PROFILE);
+    }
 
     private LatLng moveRandomly(LatLng start) {
         Random random = new Random();
-        double lat = start.latitude + (random.nextBoolean() ? MOVE_SPEED : MOVE_SPEED * -1.0);
-        double lon = start.longitude + (random.nextBoolean() ? MOVE_SPEED : MOVE_SPEED * -1.0);
+        double latDelta = random.nextDouble() * MOVE_SPEED * (random.nextBoolean() ? 1.0 : -1.0);
+        double lonDelta = random.nextDouble() * MOVE_SPEED * (random.nextBoolean() ? 1.0 : -1.0);
+        double lat = start.latitude + latDelta;
+        double lon = start.longitude + lonDelta;
         return new LatLng(lat, lon);
     }
 
     private void pollPositions() {
         // Make volley request
-        Log.i("Polling Positions!", "same");
+        Log.i("Location worker thread", "updated positions");
 
         // Move Harry randomly to test
         locations.put(harryPotter, moveRandomly(locations.get(harryPotter)));
         locations.put(hermioneGranger, moveRandomly(locations.get(hermioneGranger)));
+        locations.put(peterPettigrew, moveRandomly(locations.get(peterPettigrew)));
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -208,13 +221,16 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     private void updateLocation(Location location) {
         mMyLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-//        panToLocation(mMyLatLng);
+        panToLocation(mMyLatLng);
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 
     public void mischiefManaged(View view) {
         finish();
-        getApplication().onTerminate();
-        System.exit(0);
     }
 
     private void panToLocation(LatLng location) {
@@ -224,10 +240,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     private MarkerOptions optionsForPair(MarauderProfile profile, LatLng latLng) {
         return new MarkerOptions()
-                .flat(true)
                 .icon(BitmapDescriptorFactory.fromResource(ICONS[profile.icon]))
                 .title(profile.nickname)
-                .snippet(latLng.toString())
+                .snippet(profile.email)
                 .position(latLng);
     }
 
@@ -248,7 +263,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 .transparency(0.30f)
                 .position(ROTUNDA, 2000, 1300);
 
-//        rotundaGroundOverlay = googleMap.addGroundOverlay(rotundaMapOptions);
 //        rotundaGroundOverlay = mMap.addGroundOverlay(parchmentTextureOptions);
 
         mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);

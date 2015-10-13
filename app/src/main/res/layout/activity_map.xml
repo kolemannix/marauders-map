@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,15 +11,25 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:layout="@layout/activity_map">
+    </fragment>
 
+    <LinearLayout
+        android:layout_alignParentBottom="true"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:orientation="vertical">
         <Button
-            android:layout_width="match_parent"
+            android:id="@+id/update_profile_button"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center"
             android:text="@string/update_profile_button_text"
-            android:onClick="updateProfile"
-            />
-
-        </fragment>
-
-</LinearLayout>
+            android:onClick="updateProfile" />
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:text="@string/mischief_managed"
+            android:onClick="mischiefManaged" />
+    </LinearLayout>
+</RelativeLayout>

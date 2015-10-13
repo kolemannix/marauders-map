@@ -1,7 +1,7 @@
 <resources>
     <string name="title_activity_map">MapActivity</string>
     <string name="dummy_button">Mischief Managed!</string>
-    <string name="title_activity_splash">SplashActivity</string>
+    <string name="title_activity_splash">Marauder\'s Map</string>
     <string name="greeting">Messrs Moony, Wormtail, Padfoot, and Prongs
                             \nPurveyors of Aids to Magical Mischief-Makers
                             \nare proud to present...</string>
@@ -10,11 +10,11 @@
     <string name="insult_2">Mr. Prongs agrees with Mr Moony and would like to add that Professor Snape is an ugly git.</string>
     <string name="insult_3">Mr. Padfoot would like to register his astonishment that an idiot like that ever became a Professor.</string>
     <string name="insult_4">Mr. Wormtail bids Professor Snape good day, and advises him to wash his hair, the slime-ball.</string>
-    <string name="secret_passphrase">I solemnly swear that I am up to no good.</string>
     <string name="insult_button">Reveal your secrets!</string>
     <string name="app_name">Marauder\'s Map</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="mischief_managed">Mischief Managed!</string>
     <string name="prompt_username">Username</string>
     <string name="stored_username">username</string>
     <string name="stored_email">email</string>
@@ -26,7 +26,7 @@
     <string name="def_username">DEF_USER</string>
     <string name="def_email">DEF_EMAIL</string>
     <string name="def_passphrase">unlock</string>
-    <string name="update_profile_button_text">Update Profile</string>
+    <string name="update_profile_button_text">Customize!</string>
     <string name="action_return_to_map">Finish</string>
     <string name="login_preferences_file_key">kolemannix.com.marauderandroid.loginpreferences</string>
     <string-array name="icon_names">

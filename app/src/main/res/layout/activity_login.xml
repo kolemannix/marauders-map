@@ -6,14 +6,6 @@
 
     <!-- Login progress -->
 
-    <ProgressBar
-        android:id="@+id/login_progress" style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@color/transparent"
-        android:visibility="gone"/>
-
     <ScrollView android:id="@+id/login_form"
         android:layout_width="match_parent"
         android:background="@drawable/backdrop"
@@ -27,6 +19,12 @@
             android:layout_gravity="center_vertical"
             android:orientation="vertical">
 
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Since this is your first time using the map, please provide some basic profile information"
+                android:id="@+id/textView" />
 
             <LinearLayout
                 android:id="@+id/image_layout"
