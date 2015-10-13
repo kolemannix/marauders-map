@@ -57,16 +57,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     static MarauderProfile harryPotter = new MarauderProfile("harry@hogwarts.com", "Harry", 2);
     static MarauderProfile hermioneGranger = new MarauderProfile("hermione@hogwarts.com", "Hermione", 0);
+    static MarauderProfile ronWeasley = new MarauderProfile("beater420@weasleyclan.com", "Ron", 1);
     static MarauderProfile peterPettigrew = new MarauderProfile("peter@deatheaters.org", "Peter", 3);
 
     private boolean first;
 
     static {
         STATIC_TEST_LOCATIONS = new HashMap<>();
-
         STATIC_TEST_LOCATIONS.put(harryPotter, ROTUNDA);
         STATIC_TEST_LOCATIONS.put(hermioneGranger, RICE_HALL);
         STATIC_TEST_LOCATIONS.put(peterPettigrew, ROTUNDA);
+        STATIC_TEST_LOCATIONS.put(ronWeasley, RICE_HALL);
     }
 
     @Override
