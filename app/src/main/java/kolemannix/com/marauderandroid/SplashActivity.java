@@ -107,7 +107,7 @@ public class SplashActivity extends Activity {
                 "unlock").toLowerCase();
         Log.i("Said vs Password", s + " +vs+ " + customPassword);
 
-        if (s.toLowerCase().contentEquals("unlock")
+        if (s.trim().toLowerCase().contentEquals("unlock")
                 || s.toLowerCase().contentEquals("i solemnly swear i'm up to no good")
                 || s.toLowerCase().contentEquals("i solemnly swear i am up to no good")
                 || s.toLowerCase().contentEquals(customPassword)) {

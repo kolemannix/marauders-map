@@ -150,6 +150,7 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
         Intent intent = new Intent(this, MapActivity.class);
         intent.putExtra("profile",  profile.toStringArray());
         startActivity(intent);
+        finish();
     }
 
     private boolean isEmailValid(String email) {

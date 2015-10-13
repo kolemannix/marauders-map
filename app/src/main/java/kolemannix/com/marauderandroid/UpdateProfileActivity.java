@@ -118,7 +118,7 @@ public class UpdateProfileActivity extends Activity implements AdapterView.OnIte
 
         String email = mEmailView.getText().toString();
         String username = mUsernameView.getText().toString();
-        String passphrase = mCustomizePassphrase.getText().toString();
+        String passphrase = mCustomizePassphrase.getText().toString().trim();
 
         boolean cancel = false;
         View focusView = null;
