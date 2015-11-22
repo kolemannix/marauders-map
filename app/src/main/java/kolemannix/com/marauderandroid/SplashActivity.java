@@ -88,8 +88,6 @@ public class SplashActivity extends Activity {
         } else {
             insultIndex = -1;
         }
-        // Launch asynchronous listener process
-        locations = Service.getLocations();
     }
 
     @Override

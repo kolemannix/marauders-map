@@ -16,12 +16,16 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -33,13 +37,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private GoogleMap mMap;
 
     private MarauderProfile mProfile;
-    private LatLng mMyLatLng;
 
     private Thread mApiThread;
     private ApiRunnable mApiRunnable;
 
-    private Map<MarauderProfile, LatLng> locations;
-    private Map<MarauderProfile, Marker> markers;
+    private List<MarauderProfile> locations;
+    private Map<String, Marker> markers;
     private Marker mMyMarker;
 
     // CONSTANTS
@@ -78,17 +81,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         
         mProfile = MarauderProfile.fromStringArray(intent.getStringArrayExtra("profile"));
 
-
         first = true;
-        markers = new HashMap<MarauderProfile, Marker>();
+        markers = new HashMap<String, Marker>();
 
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        locations = STATIC_TEST_LOCATIONS;
 
         LocationListener listener = new LocationListener() {
             @Override
@@ -142,7 +142,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 mProfile = MarauderProfile.fromStringArray(data.getStringArrayExtra("profile"));
                 Log.i("New profile!", mProfile.toStringArray().toString());
                 mMyMarker.remove();
-                mMyMarker = mMap.addMarker(optionsForPair(mProfile, mMyLatLng));
+                mMyMarker = mMap.addMarker(optionsForPair(mProfile));
             }
         }
     }
@@ -166,9 +166,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         Log.i("Location worker thread", "updated positions");
 
         // Move Harry randomly to test
-        locations.put(harryPotter, moveRandomly(locations.get(harryPotter)));
-        locations.put(hermioneGranger, moveRandomly(locations.get(hermioneGranger)));
-        locations.put(peterPettigrew, moveRandomly(locations.get(peterPettigrew)));
+        try {
+            locations = Service.update(mProfile);
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -181,31 +184,48 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         if (mMap == null)
             return;
 
+        // Cleanup
+        List<String> toBeRemoved = new ArrayList<>();
+        for (Map.Entry<String, Marker> pair : markers.entrySet()) {
+
+            String email = pair.getKey();
+            boolean contained = false;
+            for (MarauderProfile profile : locations) {
+                if (profile.email.contentEquals(email)) {
+                    contained = true;
+                }
+            }
+            if (!contained)
+                toBeRemoved.add(email);
+        }
+
+        for (String email : toBeRemoved) {
+            markers.remove(email);
+        }
+
+
+        // Update markers
         if (first) {
-            for (Map.Entry<MarauderProfile, LatLng> pair : locations.entrySet()) {
-                MarauderProfile profile = pair.getKey();
-                LatLng latLng = pair.getValue();
-                Marker m = mMap.addMarker(optionsForPair(profile, latLng));
-                markers.put(profile, m);
+            for (MarauderProfile profile : locations) {
+                Marker m = mMap.addMarker(optionsForPair(profile));
+                markers.put(profile.email, m);
             }
             first = false;
         } else {
-            for (Map.Entry<MarauderProfile, LatLng> pair : locations.entrySet()) {
-                MarauderProfile profile = pair.getKey();
-                LatLng latLng = pair.getValue();
+            for (MarauderProfile profile : locations) {
 
-                if (markers.containsKey(profile)) {
+                if (markers.containsKey(profile.email)) {
                     // Already in: Update marker!
-                    markers.get(profile).setPosition(latLng);
+                    markers.get(profile.email).setPosition(profile.coordinate);
                 } else {
                     // Not yet in : Add new marker!
-                    Marker m = mMap.addMarker(optionsForPair(profile, latLng));
-                    markers.put(profile, m);
+                    Marker m = mMap.addMarker(optionsForPair(profile));
+                    markers.put(profile.email, m);
                 }
             }
         }
         // Redraw ourself
-        mMyMarker.setPosition(mMyLatLng);
+        mMyMarker.setPosition(mProfile.coordinate);
     }
 
     private LatLng lastKnownLocation() {
@@ -219,8 +239,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     }
 
     private void updateLocation(Location location) {
-        mMyLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-        panToLocation(mMyLatLng);
+        mProfile.coordinate = new LatLng(location.getLatitude(), location.getLongitude());
+        panToLocation(mProfile.coordinate);
     }
 
     @Override
@@ -237,12 +257,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         mMap.animateCamera(cameraUpdate);
     }
 
-    private MarkerOptions optionsForPair(MarauderProfile profile, LatLng latLng) {
+    private MarkerOptions optionsForPair(MarauderProfile profile) {
         return new MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromResource(ICONS[profile.icon]))
                 .title(profile.nickname)
                 .snippet(profile.email)
-                .position(latLng);
+                .position(profile.coordinate);
     }
 
     @Override
@@ -251,18 +271,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         mMap = googleMap;
 
 
-        mMyLatLng = lastKnownLocation();
-        panToLocation(mMyLatLng);
-        if (mMyLatLng != null) {
-            panToLocation(mMyLatLng);
-            mMyMarker = mMap.addMarker(optionsForPair(mProfile, mMyLatLng).snippet(mProfile.nickname + " (me)"));
-        }
-        GroundOverlayOptions parchmentTextureOptions = new GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromResource(R.drawable.parchment_texture_small))
-                .transparency(0.30f)
-                .position(ROTUNDA, 2000, 1300);
+        mProfile.coordinate = lastKnownLocation();
 
-//        rotundaGroundOverlay = mMap.addGroundOverlay(parchmentTextureOptions);
+        if (mProfile.coordinate != null) {
+            panToLocation(mProfile.coordinate);
+            mMyMarker = mMap.addMarker(optionsForPair(mProfile).snippet(mProfile.nickname + " (me)"));
+        }
 
         mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
     }
