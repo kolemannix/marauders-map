@@ -195,7 +195,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     contained = true;
                 }
             }
-            if (!contained)
+            if (!contained || email.equals(mProfile.email))
                 toBeRemoved.add(email);
         }
 
