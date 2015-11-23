@@ -50,21 +50,23 @@
                     android:layout_height="wrap_content"/>
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/email_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/prompt_email"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textSize="@dimen/email_text_font_size"
+                android:layout_marginLeft="@dimen/update_profile_email_margin"
+                android:layout_marginStart="@dimen/update_profile_email_margin"/>
+
             <EditText
                 android:id="@+id/username_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
                 android:hint="@string/prompt_username"
-                android:maxLines="1"
-                android:singleLine="true"/>
-
-            <AutoCompleteTextView
-                android:id="@+id/email_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/prompt_email"
-                android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:singleLine="true"/>
 

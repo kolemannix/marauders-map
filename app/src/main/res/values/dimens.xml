@@ -8,4 +8,6 @@
     <dimen name="icon_size">100dp</dimen>
     <dimen name="title_font_size">40sp</dimen>
     <dimen name="text_font_size">20sp</dimen>
+    <dimen name="email_text_font_size">18sp</dimen>
+    <dimen name="update_profile_email_margin">4dp</dimen>
 </resources>

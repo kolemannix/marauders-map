@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Spinner;
 
 /**
@@ -22,7 +23,7 @@ import android.widget.Spinner;
 public class UpdateProfileActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
     // UI references.
-    private EditText mEmailView;
+    private TextView mEmailView;
     private EditText mUsernameView;
     private EditText mCustomizePassphrase;
     private SharedPreferences mSharedPref;
@@ -48,7 +49,7 @@ public class UpdateProfileActivity extends Activity implements AdapterView.OnIte
 
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username_view);
-        mEmailView = (EditText) findViewById(R.id.email_view);
+        mEmailView = (TextView) findViewById(R.id.email_view);
         mCustomizePassphrase = (EditText) findViewById(R.id.customize_passphrase);
 
         setupSharedPreferences();
