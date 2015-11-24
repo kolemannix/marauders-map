@@ -13,9 +13,9 @@ import org.json.JSONObject;
  */
 public class MarauderProfile {
     public final String email;
-    public final String nickname;
+    public String nickname;
     public LatLng coordinate;
-    public final int icon;
+    public int icon;
 
     public MarauderProfile() {
         this("hp@gmail.com", "hp", 0);

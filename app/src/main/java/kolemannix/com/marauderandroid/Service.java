@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class Service {
 
-    private static final String API_URL = "http://127.0.0.1:8085/";
+    private static final String API_URL = "https://marauder-api.herokuapp.com/";
 
     public static List<MarauderProfile> update(MarauderProfile profile) throws IOException, JSONException {
         String request = API_URL + "update";
@@ -41,7 +41,7 @@ public class Service {
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
 
-        DataOutputStream wr = new DataOutputStream(conn.getOutputStream ());
+        DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
 
         JSONObject jsonProfile = profile.toJSON();
         JSONObject jsonParam = new JSONObject();
