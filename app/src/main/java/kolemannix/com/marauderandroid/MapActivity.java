@@ -48,28 +48,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     // CONSTANTS
     public static final int REQUEST_NEW_PROFILE = 100;
     private final int[] ICONS = {R.drawable.hallows_64, R.drawable.wolf_64, R.drawable.stag_64, R.drawable.mouse_64};
-    private static final LatLng ROTUNDA = new LatLng(38.035637, -78.503378);
-    private static final LatLng RICE_HALL = new LatLng(38.031713, -78.511050);
 
-    private static final double MOVE_SPEED = 0.000025f;
-    private static final int POLL_INTERVAL = 250;
-
-    private static final Map<MarauderProfile, LatLng> STATIC_TEST_LOCATIONS;
-
-    static MarauderProfile harryPotter = new MarauderProfile("harry@hogwarts.com", "Harry", 2);
-    static MarauderProfile hermioneGranger = new MarauderProfile("hermione@hogwarts.com", "Hermione", 0);
-    static MarauderProfile ronWeasley = new MarauderProfile("beater420@weasleyclan.com", "Ron", 1);
-    static MarauderProfile peterPettigrew = new MarauderProfile("peter@deatheaters.org", "Peter", 3);
+    private static final int POLL_INTERVAL = 1000;
 
     private boolean first;
-
-    static {
-        STATIC_TEST_LOCATIONS = new HashMap<>();
-        STATIC_TEST_LOCATIONS.put(harryPotter, ROTUNDA);
-        STATIC_TEST_LOCATIONS.put(hermioneGranger, RICE_HALL);
-        STATIC_TEST_LOCATIONS.put(peterPettigrew, ROTUNDA);
-        STATIC_TEST_LOCATIONS.put(ronWeasley, RICE_HALL);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,8 +121,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_NEW_PROFILE) {
             if (resultCode == RESULT_OK) {
-                mProfile = MarauderProfile.fromStringArray(data.getStringArrayExtra("profile"));
-                Log.i("New profile!", mProfile.toStringArray().toString());
+                MarauderProfile updated = MarauderProfile.fromStringArray(data.getStringArrayExtra("profile"));
+                mProfile.nickname = updated.nickname;
+                mProfile.icon = updated.icon;
                 mMyMarker.remove();
                 mMyMarker = mMap.addMarker(optionsForPair(mProfile));
             }
@@ -152,21 +135,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         startActivityForResult(intent, REQUEST_NEW_PROFILE);
     }
 
-    private LatLng moveRandomly(LatLng start) {
-        Random random = new Random();
-        double latDelta = random.nextDouble() * MOVE_SPEED * (random.nextBoolean() ? 1.0 : -1.0);
-        double lonDelta = random.nextDouble() * MOVE_SPEED * (random.nextBoolean() ? 1.0 : -1.0);
-        double lat = start.latitude + latDelta;
-        double lon = start.longitude + lonDelta;
-        return new LatLng(lat, lon);
-    }
-
     private void pollPositions() {
         // Make volley request
         Log.i("Location worker thread", "updated positions");
 
         // Move Harry randomly to test
         try {
+            if (mProfile.coordinate == null) {
+                return;
+            }
             locations = Service.update(mProfile);
         } catch (IOException | JSONException e) {
             e.printStackTrace();
@@ -195,7 +172,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     contained = true;
                 }
             }
-            if (!contained || email.equals(mProfile.email))
+            if (!contained)
                 toBeRemoved.add(email);
         }
 
@@ -217,6 +194,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 if (markers.containsKey(profile.email)) {
                     // Already in: Update marker!
                     markers.get(profile.email).setPosition(profile.coordinate);
+                    markers.get(profile.email).setTitle(profile.nickname);
+                    markers.get(profile.email).setSnippet(profile.email);
+                    markers.get(profile.email).setIcon(BitmapDescriptorFactory.fromResource(ICONS[profile.icon]));
                 } else {
                     // Not yet in : Add new marker!
                     Marker m = mMap.addMarker(optionsForPair(profile));
@@ -269,15 +249,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public void onMapReady(GoogleMap googleMap) {
         // Got mah map!
         mMap = googleMap;
-
-
         mProfile.coordinate = lastKnownLocation();
 
         if (mProfile.coordinate != null) {
             panToLocation(mProfile.coordinate);
             mMyMarker = mMap.addMarker(optionsForPair(mProfile).snippet(mProfile.nickname + " (me)"));
         }
-
         mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
     }
 
