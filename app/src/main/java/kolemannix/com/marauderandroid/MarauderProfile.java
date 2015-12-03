@@ -48,7 +48,6 @@ public class MarauderProfile {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Log.i("Profile Parsed:", result.toStringArray().toString());
         return result;
     }
 

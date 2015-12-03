@@ -28,8 +28,10 @@ public class Service {
     private static final String API_URL = "https://marauder-api.herokuapp.com/";
 
     public static List<MarauderProfile> update(MarauderProfile profile) throws IOException, JSONException {
+
         String request = API_URL + "update";
-        URL url = null;
+        System.out.println("Making request: POST " + request);
+        URL url;
         try {
             url = new URL(request);
         } catch (MalformedURLException e) {
@@ -75,4 +77,42 @@ public class Service {
         return profiles;
     }
 
+    public static void lock(MarauderProfile profile) throws IOException, JSONException {
+        String request = API_URL + "lock";
+        System.out.println("Making request: POST " + request);
+        URL url;
+        try {
+            url = new URL(request);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+
+        DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+
+        JSONObject jsonParam = new JSONObject();
+        jsonParam.put("email", profile.email);
+
+        wr.writeBytes(jsonParam.toString());
+
+        wr.flush();
+        wr.close();
+
+        int code = conn.getResponseCode();
+        StringBuilder sb = new StringBuilder();
+        if (code == HttpURLConnection.HTTP_OK) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    conn.getInputStream(),"utf-8"));
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            br.close();
+            System.out.println(""+sb.toString());
+        }
+    }
 }

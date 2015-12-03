@@ -2,6 +2,13 @@ package kolemannix.com.marauderandroid;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -9,6 +16,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -27,11 +35,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final float ZOOM_LEVEL = 18.0f;
+    private static final LatLng ROTUNDA = new LatLng(38.035717, -78.503355);
 
     private LocationManager mLocationManager;
     private GoogleMap mMap;
@@ -49,7 +57,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public static final int REQUEST_NEW_PROFILE = 100;
     private final int[] ICONS = {R.drawable.hallows_64, R.drawable.wolf_64, R.drawable.stag_64, R.drawable.mouse_64};
 
-    private static final int POLL_INTERVAL = 1000;
+    private static final int POLL_INTERVAL = 2000;
 
     private boolean first;
 
@@ -125,7 +133,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 mProfile.nickname = updated.nickname;
                 mProfile.icon = updated.icon;
                 mMyMarker.remove();
-                mMyMarker = mMap.addMarker(optionsForPair(mProfile));
+                mMyMarker = mMap.addMarker(optionsForProfile(mProfile));
             }
         }
     }
@@ -136,12 +144,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     }
 
     private void pollPositions() {
-        // Make volley request
-        Log.i("Location worker thread", "updated positions");
-
-        // Move Harry randomly to test
+        // Make api call
         try {
             if (mProfile.coordinate == null) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MapActivity.this, "Cannot acquire location", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 return;
             }
             locations = Service.update(mProfile);
@@ -184,7 +195,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         // Update markers
         if (first) {
             for (MarauderProfile profile : locations) {
-                Marker m = mMap.addMarker(optionsForPair(profile));
+                Marker m = mMap.addMarker(optionsForProfile(profile));
                 markers.put(profile.email, m);
             }
             first = false;
@@ -196,10 +207,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     markers.get(profile.email).setPosition(profile.coordinate);
                     markers.get(profile.email).setTitle(profile.nickname);
                     markers.get(profile.email).setSnippet(profile.email);
-                    markers.get(profile.email).setIcon(BitmapDescriptorFactory.fromResource(ICONS[profile.icon]));
+                    markers.get(profile.email).setIcon(BitmapDescriptorFactory.fromBitmap(bitmapForProfile(profile)));
                 } else {
                     // Not yet in : Add new marker!
-                    Marker m = mMap.addMarker(optionsForPair(profile));
+                    Marker m = mMap.addMarker(optionsForProfile(profile));
                     markers.put(profile.email, m);
                 }
             }
@@ -220,7 +231,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     private void updateLocation(Location location) {
         mProfile.coordinate = new LatLng(location.getLatitude(), location.getLongitude());
-        panToLocation(mProfile.coordinate);
     }
 
     @Override
@@ -229,6 +239,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     }
 
     public void mischiefManaged(View view) {
+        Thread lockProcess = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Service.lock(mProfile);
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        lockProcess.start();
         finish();
     }
 
@@ -237,11 +258,28 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         mMap.animateCamera(cameraUpdate);
     }
 
-    private MarkerOptions optionsForPair(MarauderProfile profile) {
+    private Bitmap bitmapForProfile(MarauderProfile profile) {
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), ICONS[profile.icon]);
+        Bitmap.Config conf = Bitmap.Config.ARGB_8888;
+        Bitmap bmp = Bitmap.createBitmap(icon.getWidth() + 100, icon.getHeight() + 100, conf);
+        Canvas canvas = new Canvas(bmp);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setFakeBoldText(true);
+        paint.setTextSize(32.0f);
+        paint.setColor(Color.BLACK);
+
+        canvas.drawText(profile.nickname, 0, icon.getHeight() + 20, paint);
+        // TODO draw icon in X middle?
+        canvas.drawBitmap(icon, 0, 0, paint);
+        return bmp;
+    }
+
+    private MarkerOptions optionsForProfile(MarauderProfile profile) {
         return new MarkerOptions()
-                .icon(BitmapDescriptorFactory.fromResource(ICONS[profile.icon]))
+                .icon(BitmapDescriptorFactory.fromBitmap(bitmapForProfile(profile)))
                 .title(profile.nickname)
                 .snippet(profile.email)
+                .anchor(0.5f, 0.5f)
                 .position(profile.coordinate);
     }
 
@@ -253,7 +291,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         if (mProfile.coordinate != null) {
             panToLocation(mProfile.coordinate);
-            mMyMarker = mMap.addMarker(optionsForPair(mProfile).snippet(mProfile.nickname + " (me)"));
+            mMyMarker = mMap.addMarker(optionsForProfile(mProfile).snippet(mProfile.nickname + " (me)"));
+        } else {
+            panToLocation(ROTUNDA);
         }
         mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
     }

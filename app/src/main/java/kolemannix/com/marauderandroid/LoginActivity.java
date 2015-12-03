@@ -133,7 +133,6 @@ public class LoginActivity extends Activity implements AdapterView.OnItemSelecte
             focusView.requestFocus();
         } else {
             int iconID = mIconSpinner.getSelectedItemPosition();
-            String iconIDAsString = Integer.toString(iconID);
 
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putString(getString(R.string.stored_username), username);
