@@ -16,6 +16,9 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -153,6 +156,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         Toast.makeText(MapActivity.this, "Cannot acquire location", Toast.LENGTH_SHORT).show();
                     }
                 });
+
                 return;
             }
             locations = Service.update(mProfile);
@@ -168,8 +172,24 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         });
     }
 
+    private Bitmap bitmapForProfile(MarauderProfile profile) {
+        LinearLayout markerLayout = (LinearLayout) this.getLayoutInflater().inflate(R.layout.marker_view, null, false);
+        ImageView imageView = (ImageView) markerLayout.findViewById(R.id.marker_icon);
+        imageView.setImageResource(ICONS[profile.icon]);
+        TextView textView = (TextView) markerLayout.findViewById(R.id.marker_text);
+        textView.setText(profile.nickname);
+        markerLayout.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        markerLayout.layout(0, 0, markerLayout.getMeasuredWidth(), markerLayout.getMeasuredHeight());
+
+        markerLayout.setDrawingCacheEnabled(true);
+        markerLayout.buildDrawingCache();
+        Bitmap bmp = markerLayout.getDrawingCache();
+        return bmp;
+    }
+
     private void redrawMarkers() {
-        if (mMap == null)
+        if (mMap == null || locations == null)
             return;
 
         // Cleanup
@@ -188,12 +208,16 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         }
 
         for (String email : toBeRemoved) {
+            // Remove marker from map
+            markers.get(email).remove();
+            // Remove marker from collection
             markers.remove(email);
         }
 
 
         // Update markers
         if (first) {
+            System.out.println(locations);
             for (MarauderProfile profile : locations) {
                 Marker m = mMap.addMarker(optionsForProfile(profile));
                 markers.put(profile.email, m);
@@ -258,21 +282,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         mMap.animateCamera(cameraUpdate);
     }
 
-    private Bitmap bitmapForProfile(MarauderProfile profile) {
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), ICONS[profile.icon]);
-        Bitmap.Config conf = Bitmap.Config.ARGB_8888;
-        Bitmap bmp = Bitmap.createBitmap(icon.getWidth() + 100, icon.getHeight() + 100, conf);
-        Canvas canvas = new Canvas(bmp);
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setFakeBoldText(true);
-        paint.setTextSize(32.0f);
-        paint.setColor(Color.BLACK);
 
-        canvas.drawText(profile.nickname, 0, icon.getHeight() + 20, paint);
-        // TODO draw icon in X middle?
-        canvas.drawBitmap(icon, 0, 0, paint);
-        return bmp;
-    }
 
     private MarkerOptions optionsForProfile(MarauderProfile profile) {
         return new MarkerOptions()
