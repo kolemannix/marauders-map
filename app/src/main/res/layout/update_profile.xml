@@ -58,8 +58,9 @@
                 android:maxLines="1"
                 android:singleLine="true"
                 android:textSize="@dimen/email_text_font_size"
-                android:layout_marginLeft="@dimen/update_profile_email_margin"
-                android:layout_marginStart="@dimen/update_profile_email_margin"/>
+                android:layout_marginLeft="@dimen/update_profile_email_side_margin"
+                android:layout_marginStart="@dimen/update_profile_email_side_margin"
+                android:layout_marginBottom="@dimen/update_profile_email_bottom_margin"/>
 
             <EditText
                 android:id="@+id/username_view"
@@ -81,8 +82,19 @@
             <Button android:id="@+id/sign_in_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/update_profile_finish_button_top_margin"
                 android:text="@string/action_return_to_map" />
+
+            <TextView android:id="@+id/clear_profile_option"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/link_color"
+                android:layout_marginTop="@dimen/clear_profile_margin"
+                android:text="@string/clear_profile_option"
+                android:onClick="clearProfile"
+                android:clickable="true"
+                android:textSize="@dimen/small_text_font" />
         </LinearLayout>
     </ScrollView>
     <ImageView

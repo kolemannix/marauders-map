@@ -58,6 +58,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     // CONSTANTS
     public static final int REQUEST_NEW_PROFILE = 100;
+    public static final int RESET_PROFILE = 200;
     private final int[] ICONS = {R.drawable.hallows_64, R.drawable.wolf_64, R.drawable.stag_64, R.drawable.mouse_64};
 
     private static final int POLL_INTERVAL = 2000;
@@ -71,7 +72,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         setContentView(R.layout.activity_map);
 
         Intent intent = getIntent();
-        
+
         mProfile = MarauderProfile.fromStringArray(intent.getStringArrayExtra("profile"));
 
         first = true;
@@ -137,6 +138,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 mProfile.icon = updated.icon;
                 mMyMarker.remove();
                 mMyMarker = mMap.addMarker(optionsForProfile(mProfile));
+            } else if (resultCode == RESET_PROFILE) {
+                MarauderProfile updated = MarauderProfile.fromStringArray(data.getStringArrayExtra("profile"));
+                mProfile.nickname = updated.nickname;
+                mProfile.icon = updated.icon;
+                mischiefManaged(null);
             }
         }
     }

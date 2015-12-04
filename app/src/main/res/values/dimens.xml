@@ -9,5 +9,9 @@
     <dimen name="title_font_size">40sp</dimen>
     <dimen name="text_font_size">20sp</dimen>
     <dimen name="email_text_font_size">18sp</dimen>
-    <dimen name="update_profile_email_margin">4dp</dimen>
+    <dimen name="update_profile_email_side_margin">4dp</dimen>
+    <dimen name="update_profile_finish_button_top_margin">12dp</dimen>
+    <dimen name="update_profile_email_bottom_margin">8dp</dimen>
+    <dimen name="clear_profile_margin">4dp</dimen>
+    <dimen name="small_text_font">15sp</dimen>
 </resources>

@@ -28,6 +28,7 @@
     <string name="def_passphrase">unlock</string>
     <string name="update_profile_button_text">Customize!</string>
     <string name="action_return_to_map">Finish</string>
+    <string name="clear_profile_option"><u>Clear user profile?</u></string>
     <string name="login_preferences_file_key">kolemannix.com.marauderandroid.loginpreferences</string>
     <string-array name="icon_names">
         <item>Hallows</item>

@@ -2,5 +2,6 @@
 
     <color name="black_overlay">#66000000</color>
     <color name="transparent">#00FFFFFF</color>
+    <color name="link_color">#0000EE</color>
 
 </resources>

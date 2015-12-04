@@ -17,6 +17,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Spinner;
 
+import org.json.JSONException;
+
+import java.io.IOException;
+
 /**
  * A login screen that offers login via username & email.
  */
@@ -31,6 +35,7 @@ public class UpdateProfileActivity extends Activity implements AdapterView.OnIte
     private Spinner mIconSpinner;
     private final int[] ICONS = {R.drawable.hallows, R.drawable.wolf, R.drawable.stag, R.drawable.mouse_64};
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +44,7 @@ public class UpdateProfileActivity extends Activity implements AdapterView.OnIte
         // Set up the icon selector
 
         mIconView = (ImageView) findViewById(R.id.icon_view);
-        mIconSpinner = (Spinner)findViewById(R.id.icon_spinner);
+        mIconSpinner = (Spinner) findViewById(R.id.icon_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.icon_names, android.R.layout.simple_spinner_item);
 
@@ -165,12 +170,37 @@ public class UpdateProfileActivity extends Activity implements AdapterView.OnIte
     private void continueToMap(MarauderProfile profile) {
         Intent resultIntent = new Intent();
         setResult(Activity.RESULT_OK, resultIntent);
-        resultIntent.putExtra("profile",  profile.toStringArray());
+        resultIntent.putExtra("profile", profile.toStringArray());
         finish();
     }
 
     private boolean isEmailValid(String email) {
         return email.contains("@") && email.contains(".");
+    }
+
+    public void clearProfile(View view) {
+        String defaultUsername = getString(R.string.def_username);
+        String defaultEmail = getString(R.string.def_email);
+        String defaultPassphrase = getString(R.string.def_passphrase);
+
+        String storedUsername = mSharedPref.getString(getString(R.string.stored_username), defaultUsername);
+        String storedEmail = mSharedPref.getString(getString(R.string.stored_email), defaultEmail);
+        int storedIcon = mSharedPref.getInt(getString(R.string.stored_icon_id), 0);
+        MarauderProfile prof = new MarauderProfile(storedEmail, storedUsername, storedIcon);
+
+
+        SharedPreferences.Editor editor = mSharedPref.edit();
+        editor.putString(getString(R.string.stored_username), defaultUsername);
+        editor.putString(getString(R.string.stored_email), defaultEmail);
+        editor.putInt(getString(R.string.stored_icon_id), -1);
+        editor.putString(getString(R.string.stored_custom_password), defaultPassphrase);
+        editor.apply();
+
+
+        Intent resultIntent = new Intent();
+        setResult(MapActivity.RESET_PROFILE, resultIntent);
+        resultIntent.putExtra("profile", prof.toStringArray());
+        finish();
     }
 
 }
