@@ -236,7 +236,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     // Already in: Update marker!
                     markers.get(profile.email).setPosition(profile.coordinate);
                     markers.get(profile.email).setTitle(profile.nickname);
-                    markers.get(profile.email).setSnippet(profile.email);
                     markers.get(profile.email).setIcon(BitmapDescriptorFactory.fromBitmap(bitmapForProfile(profile)));
                 } else {
                     // Not yet in : Add new marker!
@@ -294,7 +293,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         return new MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromBitmap(bitmapForProfile(profile)))
                 .title(profile.nickname)
-                .snippet(profile.email)
                 .anchor(0.5f, 0.5f)
                 .position(profile.coordinate);
     }
