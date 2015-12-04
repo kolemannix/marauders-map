@@ -1,7 +1,9 @@
 package kolemannix.com.marauderandroid;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
@@ -178,7 +180,29 @@ public class UpdateProfileActivity extends Activity implements AdapterView.OnIte
         return email.contains("@") && email.contains(".");
     }
 
-    public void clearProfile(View view) {
+
+    public void clickedClearProfile(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(UpdateProfileActivity.this);
+        builder.setMessage("Are you sure you want to clear this profile? All profile information will be lost.");
+        builder.setCancelable(true);
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                clearProfile();
+                dialog.cancel();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog clearAlert = builder.create();
+        clearAlert.show();
+    }
+
+
+
+    public void clearProfile() {
         String defaultUsername = getString(R.string.def_username);
         String defaultEmail = getString(R.string.def_email);
         String defaultPassphrase = getString(R.string.def_passphrase);

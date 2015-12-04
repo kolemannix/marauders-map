@@ -92,7 +92,7 @@
                 android:textColor="@color/link_color"
                 android:layout_marginTop="@dimen/clear_profile_margin"
                 android:text="@string/clear_profile_option"
-                android:onClick="clearProfile"
+                android:onClick="clickedClearProfile"
                 android:clickable="true"
                 android:textSize="@dimen/small_text_font" />
         </LinearLayout>
