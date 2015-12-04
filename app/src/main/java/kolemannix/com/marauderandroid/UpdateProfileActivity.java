@@ -224,6 +224,7 @@ public class UpdateProfileActivity extends Activity implements AdapterView.OnIte
         Intent resultIntent = new Intent();
         setResult(MapActivity.RESET_PROFILE, resultIntent);
         resultIntent.putExtra("profile", prof.toStringArray());
+
         finish();
     }
 

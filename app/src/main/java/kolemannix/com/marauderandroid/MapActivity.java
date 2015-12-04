@@ -245,7 +245,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             }
         }
         // Redraw ourself
-        mMyMarker.setPosition(mProfile.coordinate);
+        if (mMyMarker == null)
+            mMyMarker = mMap.addMarker(optionsForProfile(mProfile));
+        else
+            mMyMarker.setPosition(mProfile.coordinate);
     }
 
     private LatLng lastKnownLocation() {

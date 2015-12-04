@@ -108,6 +108,8 @@ public class SplashActivity extends Activity {
         if (s.trim().toLowerCase().contentEquals("unlock")
                 || s.toLowerCase().contentEquals("i solemnly swear i'm up to no good")
                 || s.toLowerCase().contentEquals("i solemnly swear i am up to no good")
+                || s.toLowerCase().contentEquals("i solemnly swear that i am up to no good")
+                || s.toLowerCase().contentEquals("i solemnly swear that i'm up to no good")
                 || s.toLowerCase().contentEquals(customPassword)) {
             unlock();
         } else {
