@@ -307,7 +307,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         if (mProfile.coordinate != null) {
             panToLocation(mProfile.coordinate);
-            mMyMarker = mMap.addMarker(optionsForProfile(mProfile).snippet(mProfile.nickname + " (me)"));
+            mMyMarker = mMap.addMarker(optionsForProfile(mProfile));
         } else {
             panToLocation(ROTUNDA);
         }
